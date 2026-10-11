@@ -48,8 +48,11 @@ export function Button({
       aria-busy={isLoading || undefined}
       className={cn(
         // 44px minimum target keeps mobile taps usable without rounding.
+        // NOTE: use text-control (1rem) for size here — plain `text-base`
+        // resolves to the --color-base colour token, which would paint
+        // transparent-variant labels near-black on the dark page.
         'inline-flex min-h-11 items-center justify-center gap-2.5 px-6 py-3',
-        'font-body text-base leading-6 tracking-[0.01em]',
+        'font-body text-control leading-6 tracking-[0.01em]',
         'transition-colors duration-150 ease-standard',
         'disabled:cursor-not-allowed disabled:opacity-50',
         VARIANT_CLASSES[variant],
@@ -76,7 +79,7 @@ export interface LinkButtonProps {
 
 const LINK_BASE_CLASSES =
   'inline-flex min-h-11 items-center justify-center gap-2.5 px-6 py-3 ' +
-  'font-body text-base leading-6 tracking-[0.01em] transition-colors duration-150 ease-standard'
+  'font-body text-control leading-6 tracking-[0.01em] transition-colors duration-150 ease-standard'
 
 /**
  * Router link styled as a button. Used instead of `<button>` whenever the
