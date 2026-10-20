@@ -1,0 +1,437 @@
+/**
+ * Phase 19-B interactive panels: capabilities choreography, how-it-works
+ * sequence, product preview browser frame.
+ */
+
+/* ---- Capabilities ---------------------------------------------------- */
+.pie-cap-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+@media (min-width: 1024px) {
+  .pie-cap-layout {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 2.5rem;
+    align-items: start;
+  }
+}
+
+.pie-cap-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pie-cap-item + .pie-cap-item {
+  border-top: 1px solid var(--pie-line);
+}
+
+.pie-cap-button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: baseline;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  padding: 1.125rem 1rem;
+  cursor: pointer;
+  color: var(--pie-ink);
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease;
+}
+
+.pie-cap-button:hover {
+  background-color: var(--pie-surface);
+}
+
+.pie-cap-button[aria-pressed='true'] {
+  background-color: var(--pie-surface);
+  border-left-color: var(--pie-accent);
+}
+
+.pie-cap-key {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--pie-faint);
+}
+
+.pie-cap-button h3 {
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+.pie-cap-arrow {
+  color: var(--pie-faint);
+  transition:
+    color 200ms ease,
+    transform 250ms ease;
+}
+
+.pie-cap-button[aria-pressed='true'] .pie-cap-arrow {
+  color: var(--pie-accent);
+  transform: translateX(4px);
+}
+
+.pie-cap-preview {
+  background-color: var(--pie-surface);
+  border: 1px solid var(--pie-line-strong);
+  padding: 1.5rem;
+  min-height: 380px;
+}
+
+@media (min-width: 1024px) {
+  .pie-cap-preview {
+    position: sticky;
+    top: 6rem;
+    min-height: 440px;
+    padding: 2rem;
+  }
+}
+
+.pie-cap-preview h3 {
+  font-size: 1.25rem;
+  line-height: 1.4;
+  font-weight: 400;
+  margin-top: 1rem;
+}
+
+.pie-cap-preview > p {
+  margin-top: 0.5rem;
+  color: var(--pie-muted);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.pie-mini {
+  margin-top: 1.5rem;
+  border: 1px solid var(--pie-line);
+  background-color: var(--pie-bg);
+  padding: 1rem;
+}
+
+.pie-mini-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.625rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.pie-mini-row + .pie-mini-row {
+  border-top: 1px solid var(--pie-line);
+}
+
+.pie-mini-label {
+  color: var(--pie-soft);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pie-mini-meta {
+  color: var(--pie-faint);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.pie-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--pie-line-strong);
+  padding: 0.25rem 0.5rem;
+  white-space: nowrap;
+}
+
+.pie-chip.is-added {
+  color: var(--pie-positive);
+  border-color: rgba(87, 201, 143, 0.45);
+}
+
+.pie-chip.is-modified {
+  color: var(--pie-accent-ink);
+  border-color: rgba(155, 123, 234, 0.5);
+}
+
+.pie-chip.is-removed {
+  color: var(--pie-soft);
+}
+
+.pie-chip.is-score {
+  color: var(--pie-info);
+  border-color: rgba(143, 184, 221, 0.45);
+}
+
+.pie-score-track {
+  margin-top: 0.75rem;
+  height: 6px;
+  background-color: var(--pie-line);
+}
+
+.pie-score-fill {
+  height: 100%;
+  background-color: var(--pie-info);
+}
+
+.pie-scale {
+  display: flex;
+  gap: 0.375rem;
+  margin-top: 0.75rem;
+}
+
+.pie-scale i {
+  flex: 1;
+  height: 1.75rem;
+  border: 1px solid var(--pie-line-strong);
+  font-style: normal;
+}
+
+.pie-scale i.is-on {
+  background-color: rgba(155, 123, 234, 0.35);
+  border-color: var(--pie-accent);
+}
+
+/* ---- How it works ----------------------------------------------------- */
+.pie-steps-wrap {
+  position: relative;
+  margin-top: 3rem;
+}
+
+.pie-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pie-steps-rail {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .pie-steps {
+    padding-left: 0;
+  }
+
+  .pie-steps-rail {
+    display: block;
+    position: absolute;
+    left: 1.625rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 1px;
+    background-color: var(--pie-line);
+  }
+
+  .pie-steps-progress {
+    position: absolute;
+    inset: 0;
+    background-color: var(--pie-accent);
+    transform-origin: top center;
+  }
+}
+
+.pie-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  padding-block: 2rem;
+  border-top: 1px solid var(--pie-line);
+  will-change: transform, opacity;
+}
+
+@media (min-width: 768px) {
+  .pie-step {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2.5rem;
+    padding-left: 4.5rem;
+  }
+}
+
+.pie-step-marker {
+  position: absolute;
+  left: 0;
+  top: 2rem;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 3.375rem;
+  height: 3.375rem;
+  background-color: var(--pie-bg);
+  border: 1px solid var(--pie-line-strong);
+  font-family: var(--pie-serif);
+  font-size: 1.25rem;
+  color: var(--pie-accent-ink);
+}
+
+@media (min-width: 768px) {
+  .pie-step-marker {
+    display: inline-flex;
+  }
+}
+
+.pie-step h3 {
+  font-size: 1.5rem;
+  line-height: 1.3;
+  font-weight: 400;
+}
+
+.pie-step-index {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  color: var(--pie-faint);
+  margin-bottom: 0.5rem;
+}
+
+.pie-step p {
+  margin-top: 0.625rem;
+  color: var(--pie-muted);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  max-width: 46ch;
+}
+
+.pie-step-visual {
+  border: 1px solid var(--pie-line);
+  background-color: var(--pie-surface);
+  padding: 1.25rem;
+  align-self: start;
+}
+
+.pie-mono-line {
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--pie-info);
+  word-break: break-all;
+  padding-bottom: 0.625rem;
+}
+
+/* ---- Product preview --------------------------------------------------- */
+.pie-browser {
+  margin-top: 3rem;
+  border: 1px solid var(--pie-line-strong);
+  background-color: var(--pie-surface);
+}
+
+.pie-browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--pie-line);
+}
+
+.pie-browser-squares {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.pie-browser-squares i {
+  width: 0.625rem;
+  height: 0.625rem;
+  border: 1px solid var(--pie-line-strong);
+  font-style: normal;
+}
+
+.pie-browser-url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  color: var(--pie-muted);
+  border: 1px solid var(--pie-line);
+  background-color: var(--pie-bg);
+  padding: 0.375rem 0.75rem;
+}
+
+.pie-browser-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--pie-line);
+  overflow-x: auto;
+}
+
+.pie-browser-tabs button {
+  flex: 1 0 auto;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--pie-line);
+  color: var(--pie-muted);
+  font-size: 0.875rem;
+  padding: 0.875rem 1.25rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+}
+
+.pie-browser-tabs button:hover {
+  color: var(--pie-ink);
+}
+
+.pie-browser-tabs button[aria-selected='true'] {
+  color: var(--pie-ink);
+  background-color: var(--pie-raised);
+  box-shadow: inset 0 2px 0 var(--pie-accent);
+}
+
+.pie-browser-body {
+  padding: 1.25rem;
+  min-height: 340px;
+}
+
+@media (min-width: 768px) {
+  .pie-browser-body {
+    padding: 2rem;
+    min-height: 380px;
+  }
+}
+
+.pie-preview-note {
+  display: inline-block;
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pie-faint);
+  border: 1px dashed var(--pie-line-strong);
+  padding: 0.375rem 0.625rem;
+  margin-bottom: 1.25rem;
+}
+
+.pie-cta-band {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--pie-line);
+}
+
+.pie-cta-note {
+  width: 100%;
+  color: var(--pie-faint);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}

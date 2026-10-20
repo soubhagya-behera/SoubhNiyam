@@ -1,0 +1,123 @@
+/**
+ * Phase 19-B workflow rail: Track → Compare → Assess → Understand.
+ *
+ * A striking horizontal composition with alternating depth offsets at
+ * desktop widths; a clear vertical sequence below. The violet progress
+ * line is driven by section scroll (see `Workflow.tsx`).
+ */
+
+.pie-rail-wrap {
+  position: relative;
+  margin-top: 3.5rem;
+}
+
+.pie-rail-line {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .pie-rail-line {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--pie-line);
+    transform-origin: left center;
+  }
+
+  .pie-rail-progress {
+    position: absolute;
+    inset: 0;
+    background-color: var(--pie-accent);
+    transform-origin: left center;
+  }
+}
+
+.pie-rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .pie-rail {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.5rem;
+    padding-top: 2.5rem;
+  }
+
+  .pie-rail > li:nth-child(even) {
+    transform: translateY(2.5rem);
+  }
+}
+
+.pie-stage-card {
+  position: relative;
+  background-color: var(--pie-surface);
+  border: 1px solid var(--pie-line);
+  border-top: 1px solid var(--pie-line-strong);
+  padding: 1.5rem;
+  will-change: transform, opacity;
+}
+
+/* Connectors tie every stage card back to the pipeline rail so the
+   four columns read as one connected process, including the offset
+   alternate row. */
+@media (min-width: 1024px) {
+  .pie-stage-card::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 1.5rem;
+    width: 1px;
+    height: 1.25rem;
+    background-color: var(--pie-line-strong);
+  }
+
+  .pie-rail > li:nth-child(even) .pie-stage-card::before {
+    height: 3.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pie-rail-wrap {
+    padding-bottom: 2.5rem;
+  }
+}
+
+.pie-stage-index {
+  font-family: var(--pie-serif);
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--pie-faint);
+}
+
+.pie-stage-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--pie-line-strong);
+  color: var(--pie-accent-ink);
+  margin-top: 1.25rem;
+}
+
+.pie-stage-card h3 {
+  margin-top: 1rem;
+  font-size: 1.375rem;
+  line-height: 1.3;
+  font-weight: 400;
+}
+
+.pie-stage-card p {
+  margin-top: 0.625rem;
+  color: var(--pie-muted);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}

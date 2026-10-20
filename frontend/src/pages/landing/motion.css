@@ -1,0 +1,83 @@
+/**
+ * Phase 19-B kinetic ribbon: dual-direction seamless marquees.
+ *
+ * Each track holds two identical chunks and translates exactly -50%, so
+ * the loop has no gap or jitter. Rows travel in opposite directions at a
+ * measured pace. Under reduced motion the ribbons rest as static strips.
+ */
+
+.pie-ribbon {
+  border-block: 1px solid var(--pie-line);
+  background-color: var(--pie-bg-2);
+  overflow: clip;
+}
+
+.pie-ribbon-row {
+  overflow: clip;
+  white-space: nowrap;
+}
+
+.pie-ribbon-row + .pie-ribbon-row {
+  border-top: 1px solid var(--pie-line);
+}
+
+.pie-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: pie-marquee-left 30s linear infinite;
+}
+
+.pie-marquee-track.is-reverse {
+  animation: pie-marquee-right 38s linear infinite;
+}
+
+.pie-marquee-chunk {
+  flex-shrink: 0;
+  padding-block: 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--pie-muted);
+}
+
+.pie-marquee-track.is-reverse .pie-marquee-chunk {
+  color: var(--pie-faint);
+}
+
+.pie-marquee-chunk strong {
+  font-weight: 400;
+  color: var(--pie-accent-ink);
+}
+
+@media (min-width: 768px) {
+  .pie-marquee-chunk {
+    padding-block: 1.25rem;
+    font-size: 0.9375rem;
+  }
+}
+
+@keyframes pie-marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes pie-marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pie-marquee-track,
+  .pie-marquee-track.is-reverse {
+    animation: none;
+  }
+}
