@@ -5,7 +5,7 @@ import { ROUTES } from '../../app/routes'
  * Editorial hero for the overview.
  *
  * The purple wash and oversized display type reproduce the reference's hero
- * treatment; the copy and CTAs are Policy Impact Engine content.
+ * treatment; the copy and CTAs are SoubhNiyam content.
  */
 export function HeroSection() {
   return (

@@ -38,7 +38,7 @@ export function LandingNav() {
         <Link
           to={ROUTES.home}
           className="flex min-h-11 shrink-0 items-center"
-          aria-label="Policy Impact Engine — home"
+          aria-label="SoubhNiyam — home"
         >
           <BrandMark />
         </Link>

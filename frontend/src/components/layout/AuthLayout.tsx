@@ -28,7 +28,7 @@ export function AuthLayout({
           <Link
             to={ROUTES.home}
             className="flex min-h-11 items-center"
-            aria-label="Policy Impact Engine — home"
+            aria-label="SoubhNiyam — home"
           >
             <BrandMark />
           </Link>
@@ -50,7 +50,7 @@ export function AuthLayout({
         <div className="shell-frame py-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="font-body text-sm text-ink-ghost">
-              Policy Impact Engine
+              SoubhNiyam — Policy Change Intelligence
             </p>
             {footer}
           </div>

@@ -14,8 +14,8 @@ export function BrandMark({ className }: { className?: string }) {
         'font-display text-lg leading-none tracking-[-0.02em] text-ink whitespace-nowrap'
       }
     >
-      Policy Impact
-      <span className="text-accent-soft"> Engine</span>
+      Soubh
+      <span className="text-accent-soft">Niyam</span>
     </span>
   )
 }

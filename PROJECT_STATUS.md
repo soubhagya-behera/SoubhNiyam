@@ -1,6 +1,6 @@
-# Policy Impact Engine — Project Status
+# SoubhNiyam — Project Status
 
-**Project:** Policy Impact Engine
+**Project:** SoubhNiyam
 **Repository:** policy-impact-engine
 
 ## Stack
@@ -28,7 +28,7 @@ The database name `policypulse` is retained intentionally. No rename is planned 
 - GitHub repository created
 - Git initialized
 - Initial backend committed and pushed
-- Project renamed from PolicyPulse to Policy Impact Engine
+- Project renamed from PolicyPulse to Policy Impact Engine, then to SoubhNiyam
 - Java package renamed to `com.soubhagya.policyimpactengine`
 - Main application class renamed to `PolicyImpactEngineApplication`
 - `application.properties` Git-ignored (local configuration only)

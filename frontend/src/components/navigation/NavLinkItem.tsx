@@ -5,7 +5,7 @@ import { cn } from '../../lib/cn'
 /**
  * Primary navigation definition.
  *
- * Labels are Policy Impact Engine product terms. The underline treatment
+ * Labels are SoubhNiyam product terms. The underline treatment
  * mirrors the reference: a 3px bar that scales in from one edge on hover and
  * focus, over a soft purple block wash.
  */

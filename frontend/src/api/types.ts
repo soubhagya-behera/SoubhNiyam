@@ -1,5 +1,5 @@
 /**
- * Shared domain types for the Policy Impact Engine API.
+ * Shared domain types for the SoubhNiyam API.
  *
  * Every shape mirrors a backend DTO one-to-one. The backend renders enum
  * values as their `name()` string, so these are string unions constrained to

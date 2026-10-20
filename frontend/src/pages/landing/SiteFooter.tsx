@@ -19,14 +19,14 @@ export function SiteFooter() {
             <Link
               to={ROUTES.home}
               className="inline-flex min-h-11 items-center"
-              aria-label="Policy Impact Engine — back to top"
+              aria-label="SoubhNiyam — back to top"
             >
               <BrandMark />
             </Link>
             <p className="pie-footer-note">
-              Track public policy documents, compare versions, and assess
-              privacy impact deterministically against your preferences —
-              with an evidence-backed audit trail for every step.
+              Policy Change Intelligence. Track public policy documents, compare
+              versions, and assess privacy impact deterministically against your
+              preferences — with an evidence-backed audit trail for every step.
             </p>
           </div>
           <div>
@@ -46,8 +46,8 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="pie-footer-base">
-          <span>© 2026 Policy Impact Engine</span>
-          <span>Deterministic assessment · optional AI explanations</span>
+          <span>© 2026 SoubhNiyam</span>
+          <span>Understand what changed. Know what it means.</span>
         </div>
       </div>
     </footer>

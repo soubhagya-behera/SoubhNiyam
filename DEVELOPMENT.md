@@ -1,6 +1,6 @@
-# Policy Impact Engine — Development Guide
+# SoubhNiyam — Development Guide
 
-This guide defines the engineering rules, quality expectations, and development workflow for the Policy Impact Engine. It applies to every contribution, regardless of who makes it.
+This guide defines the engineering rules, quality expectations, and development workflow for SoubhNiyam. It applies to every contribution, regardless of who makes it.
 
 The architecture is documented in [ARCHITECTURE.md](ARCHITECTURE.md), the current implementation status in [PROJECT_STATUS.md](PROJECT_STATUS.md), and architectural decisions in [DECISIONS.md](DECISIONS.md).
 

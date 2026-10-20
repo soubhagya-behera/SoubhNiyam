@@ -1,6 +1,6 @@
 # Frontend Design Reference
 
-Reference-only artifacts for the Policy Impact Engine frontend. Neither file in this
+Reference-only artifacts for the SoubhNiyam frontend. Neither file in this
 folder is application code, and neither is imported, bundled, served, or `require`d by
 the React application.
 
@@ -46,7 +46,7 @@ The frontend should **reproduce the visual language** measured in these referenc
 
 ## Do not copy
 
-The actual product content must be **Policy Impact Engine**. Reproduce the visual
+The actual product content must be **SoubhNiyam**. Reproduce the visual
 language only — never the source site's identity:
 
 - Render branding or Render logo

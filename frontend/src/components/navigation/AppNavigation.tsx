@@ -31,7 +31,7 @@ export function AppNavigation() {
           <Link
             to={ROUTES.app}
             className="flex min-h-11 items-center"
-            aria-label="Policy Impact Engine — Overview"
+            aria-label="SoubhNiyam — Overview"
           >
             <BrandMark />
           </Link>

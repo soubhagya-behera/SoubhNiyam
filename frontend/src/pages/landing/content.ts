@@ -32,7 +32,7 @@ export const LANDING_NAV_LINKS: LandingNavLink[] = [
   { label: 'About', href: `#${LANDING_IDS.about}` },
 ]
 
-export const HERO_EYEBROW = 'Track · Compare · Understand'
+export const HERO_EYEBROW = 'Policy Change Intelligence'
 
 export const HERO_TITLE = 'Understand policy changes before they affect you.'
 

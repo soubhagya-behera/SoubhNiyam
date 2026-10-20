@@ -63,7 +63,7 @@ export function ProductPreview() {
                 <i />
               </span>
               <span className="pie-browser-url">
-                Policy Impact Engine · workspace preview
+                SoubhNiyam · workspace preview
               </span>
             </div>
             <div

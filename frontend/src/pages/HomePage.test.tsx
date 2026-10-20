@@ -39,7 +39,7 @@ describe('Phase 19-B landing page', () => {
         name: 'Understand policy changes before they affect you.',
       }),
     ).toBeTruthy()
-    expect(screen.getByText('Track · Compare · Understand')).toBeTruthy()
+    expect(screen.getByText('Policy Change Intelligence')).toBeTruthy()
     expect(
       screen.getByText(/compare versions, assess privacy impact/i),
     ).toBeTruthy()

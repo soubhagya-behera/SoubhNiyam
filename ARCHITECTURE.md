@@ -1,9 +1,9 @@
-# Policy Impact Engine — Architecture
+# SoubhNiyam — Architecture
 
 **Repository:** `policy-impact-engine`
 **Stack:** Java 17 · Spring Boot 4.1.1 · Maven · PostgreSQL · Spring Web MVC · Spring Data JPA · Spring Security · Validation · Lombok
 
-This document is the technical source of truth for the architecture of the Policy Impact Engine. It records the approved design: the deterministic analysis pipeline, the target module structure, the planned domain model, the planned API surface, the testing strategy, and the phased implementation roadmap.
+This document is the technical source of truth for the architecture of SoubhNiyam. It records the approved design: the deterministic analysis pipeline, the target module structure, the planned domain model, the planned API surface, the testing strategy, and the phased implementation roadmap.
 
 Status labels are used throughout to separate what exists from what is planned:
 
@@ -18,7 +18,7 @@ Status labels are used throughout to separate what exists from what is planned:
 
 ## 1. Project Purpose
 
-Policy Impact Engine is a policy-analysis system that tracks changes in published policies — privacy policies, terms of service, and similar documents — and determines how those changes may affect individual users based on their privacy preferences.
+SoubhNiyam is a policy-analysis system that tracks changes in published policies — privacy policies, terms of service, and similar documents — and determines how those changes may affect individual users based on their privacy preferences.
 
 The system maintains a versioned record of every tracked policy, compares successive versions, interprets the differences in terms of a privacy-concept taxonomy, and produces a personalized impact assessment together with a deterministic recommended action.
 

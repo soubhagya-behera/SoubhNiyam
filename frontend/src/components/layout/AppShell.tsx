@@ -41,11 +41,10 @@ export function SiteFooter() {
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="font-display text-base text-ink-muted">
-              Policy Impact Engine
+              SoubhNiyam
             </p>
             <p className="mt-2 max-w-prose font-body text-sm text-ink-ghost">
-              Track policy changes, see their privacy impact, and know what
-              action to take.
+              Understand what changed. Know what it means.
             </p>
           </div>
 

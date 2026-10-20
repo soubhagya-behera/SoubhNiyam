@@ -1,6 +1,6 @@
-# Policy Impact Engine — Architecture Decision Records
+# SoubhNiyam — Architecture Decision Records
 
-This file records the architectural decisions of the Policy Impact Engine in Architecture Decision Record (ADR) style. Each decision distinguishes Status, Context, Decision, and Consequences.
+This file records the architectural decisions of SoubhNiyam in Architecture Decision Record (ADR) style. Each decision distinguishes Status, Context, Decision, and Consequences.
 
 Decisions listed here are approved. Proposals that have not been approved are marked explicitly as **PROPOSED** and must not be treated as part of the architecture until their status changes.
 
