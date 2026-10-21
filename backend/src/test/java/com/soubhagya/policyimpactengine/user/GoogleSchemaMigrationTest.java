@@ -15,21 +15,21 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.soubhagya.policyimpactengine.audit.domain.AuditEventRepository;
-import com.soubhagya.policyimpactengine.user.domain.GoogleCompletionRepository;
 import com.soubhagya.policyimpactengine.user.domain.RefreshTokenRepository;
-import com.soubhagya.policyimpactengine.user.domain.User;
 import com.soubhagya.policyimpactengine.user.domain.UserRepository;
 
 /**
- * Phase 18-B — schema tests for Flyway V25–V27 (see DECISIONS.md
- * ADR-037).
+ * Phase 18-B schema tests for Flyway V25–V27, retained after Google
+ * sign-in was removed in Phase 21-C.
  *
- * <p>Proves V25–V27 apply cleanly with V1–V24 untouched: {@code
+ * <p>These migrations and their database objects must stay in place so
+ * existing users, completion rows, and historical audit events remain
+ * readable. The test proves V25–V27 apply cleanly: {@code
  * app_user.google_sub} is nullable with a partial unique index (any
  * number of NULL rows coexist, every non-null subject is globally
  * unique), the completion table carries its uniqueness/expiry guards,
- * and the audit {@code event_type} CHECK holds the new Google code.
- * No service behavior is exercised here.
+ * and the audit {@code event_type} CHECK holds the historical Google
+ * login code. No OAuth service behavior is exercised here.
  */
 @SpringBootTest
 @Testcontainers
@@ -49,15 +49,12 @@ class GoogleSchemaMigrationTest {
 	private RefreshTokenRepository refreshTokenRepository;
 
 	@Autowired
-	private GoogleCompletionRepository completionRepository;
-
-	@Autowired
 	private AuditEventRepository auditEventRepository;
 
 	@BeforeEach
 	void clean() {
 		auditEventRepository.deleteAll();
-		completionRepository.deleteAll();
+		jdbcTemplate.update("DELETE FROM auth_google_completion");
 		refreshTokenRepository.deleteAll();
 		userRepository.deleteAll();
 	}
@@ -89,26 +86,19 @@ class GoogleSchemaMigrationTest {
 
 	@Test
 	void duplicateGoogleSubIsRejectedAtTheDatabase() {
-		User first = new User();
-		first.assignGoogleIdentity("first@example.com", "duplicated-sub");
-		userRepository.saveAndFlush(first);
-
-		User second = new User();
-		second.assignGoogleIdentity("second@example.com", "duplicated-sub");
-		assertThatThrownBy(() -> userRepository.saveAndFlush(second))
+		insertIdentities("first@example.com", "duplicated-sub");
+		assertThatThrownBy(() -> insertIdentities("second@example.com", "duplicated-sub"))
 				.isInstanceOf(DataIntegrityViolationException.class);
 	}
 
 	@Test
 	void nullGoogleSubsCoexist() {
-		User first = new User();
-		first.assignCredentials("plain-one@example.com", "hash-one");
-		User second = new User();
-		second.assignCredentials("plain-two@example.com", "hash-two");
-		userRepository.saveAll(java.util.List.of(first, second));
-		userRepository.flush();
+		insertIdentities("plain-one@example.com", null);
+		insertIdentities("plain-two@example.com", null);
 
-		assertThat(userRepository.findByGoogleSub("missing")).isEmpty();
+		Integer nullCount = jdbcTemplate.queryForObject(
+				"SELECT count(*) FROM app_user WHERE google_sub IS NULL", Integer.class);
+		assertThat(nullCount).isEqualTo(2);
 	}
 
 	@Test
@@ -130,13 +120,13 @@ class GoogleSchemaMigrationTest {
 				.isInstanceOf(DataIntegrityViolationException.class);
 
 		// Expiry guard: expiry must stay after creation.
-		User owner = new User();
-		owner.assignCredentials("guard@example.com", "hash-guard");
-		userRepository.saveAndFlush(owner);
+		insertIdentities("guard@example.com", null);
+		java.util.UUID ownerId = jdbcTemplate.queryForObject(
+				"SELECT id FROM app_user WHERE email='guard@example.com'", java.util.UUID.class);
 		assertThatThrownBy(() -> jdbcTemplate.update(
 				"INSERT INTO auth_google_completion (id, user_id, code_hash, created_at,"
 						+ " expires_at) VALUES (gen_random_uuid(), ?, ?, now(), now())",
-				owner.getId(), "b".repeat(64)))
+				ownerId, "b".repeat(64)))
 				.isInstanceOf(DataIntegrityViolationException.class);
 	}
 
@@ -146,5 +136,12 @@ class GoogleSchemaMigrationTest {
 				"SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname=?",
 				String.class, "audit_event_event_type_check");
 		assertThat(definition).contains("'AUTH_GOOGLE_LOGIN_SUCCEEDED'");
+	}
+
+	private void insertIdentities(String email, String googleSub) {
+		jdbcTemplate.update(
+				"INSERT INTO app_user (id, created_at, updated_at, email, google_sub)"
+						+ " VALUES (gen_random_uuid(), now(), now(), ?, ?)",
+				email, googleSub);
 	}
 }

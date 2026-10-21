@@ -10,8 +10,6 @@ export const ROUTES = {
   home: '/',
   login: '/login',
   register: '/register',
-  /** SPA landing for the backend Google callback; carries only the one-time code. */
-  googleCallback: '/auth/google/callback',
   app: '/app',
   policies: '/app/policies',
   policyDetail: '/app/policies/:policyId',

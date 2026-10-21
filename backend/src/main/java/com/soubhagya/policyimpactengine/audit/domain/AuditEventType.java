@@ -56,10 +56,10 @@ public enum AuditEventType {
 	 */
 	AUTH_REFRESH_REUSE_DETECTED,
 	/**
-	 * Phase 18-B — Google login witness (see DECISIONS.md ADR-037):
-	 * emitted post-commit best-effort when a validated Google identity
-	 * yields our application token pair (actor = local user, resource =
-	 * {@code USER}/user id, empty metadata). Failures stay silent.
+	 * Phase 18-B historical Google login witness (see DECISIONS.md
+	 * ADR-037): retained for existing audit rows and the frozen V27
+	 * database CHECK. Google sign-in was removed in Phase 21-C, so no
+	 * active path emits this code.
 	 */
 	AUTH_GOOGLE_LOGIN_SUCCEEDED,
 	/**

@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -12,7 +11,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -68,22 +66,6 @@ import jakarta.servlet.http.HttpServletResponse;
  * CORS preflights are not rejected by authentication while actual
  * requests stay JWT-gated; actuator ({@code /actuator/health},
  * {@code /actuator/info}) stays authenticated by default.
- *
- * <p>Phase 18-B adds Google sign-in without touching the Bearer posture
- * (see DECISIONS.md ADR-037): {@code GET /api/v1/auth/google/start},
- * {@code POST /api/v1/auth/google/complete}, and Spring's
- * {@code /oauth2/authorization/*} + {@code /login/oauth2/code/*}
- * endpoints stay permitted. The OAuth2 login wiring itself applies only
- * when a Google client registration exists (production and opted-in
- * local runs); without {@code GOOGLE_CLIENT_ID} the chain is exactly
- * the pre-Google chain, so existing tests and local boot are
- * unaffected. The authorization-request state lives in a short-lived
- * cookie ({@link CookieAuthorizationRequestRepository}), never in an
- * HTTP session: {@code SessionCreationPolicy.STATELESS} is unchanged,
- * no application login session is created, and API authentication
- * stays Bearer-only. OIDC validation (signature, issuer, audience,
- * expiry, state) is Spring's; failures redirect to the SPA login page
- * with a generic flag and never log provider material.
  */
 @Configuration
 @EnableWebSecurity
@@ -97,11 +79,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper objectMapper,
 			JwtAuthenticationFilter jwtAuthenticationFilter, RateLimitFilter rateLimitFilter,
-			CorsConfigurationSource corsConfigurationSource,
-			ObjectProvider<ClientRegistrationRepository> clientRegistrations,
-			CookieAuthorizationRequestRepository cookieAuthorizationRequestRepository,
-			GoogleOAuthSuccessHandler googleOAuthSuccessHandler,
-			GoogleOAuthProperties googleOAuthProperties)
+			CorsConfigurationSource corsConfigurationSource)
 			throws Exception {
 		http
 				.cors(cors -> cors.configurationSource(corsConfigurationSource))
@@ -126,10 +104,6 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/v1/auth/google/start").permitAll()
-						.requestMatchers(HttpMethod.POST, "/api/v1/auth/google/complete").permitAll()
-						.requestMatchers("/oauth2/authorization/*").permitAll()
-						.requestMatchers("/login/oauth2/code/*").permitAll()
 						.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
 						.anyRequest().authenticated())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -137,21 +111,6 @@ public class SecurityConfig {
 				.exceptionHandling(ex -> ex
 						.authenticationEntryPoint(authenticationEntryPoint(objectMapper))
 						.accessDeniedHandler(accessDeniedHandler(objectMapper)));
-		// Phase 18-B — Google OIDC is opt-in by configuration (see
-		// DECISIONS.md ADR-037): Spring Boot only creates a
-		// ClientRegistrationRepository when google client properties
-		// are present, so without credentials this branch is skipped
-		// and the chain above is byte-for-byte the pre-Google posture.
-		if (clientRegistrations.getIfAvailable() != null) {
-			http.oauth2Login(oauth -> oauth
-					.authorizationEndpoint(authorization -> authorization
-							.authorizationRequestRepository(
-									cookieAuthorizationRequestRepository))
-					.successHandler(googleOAuthSuccessHandler)
-					.failureHandler((request, response, exception) -> response.sendRedirect(
-							googleOAuthProperties.frontendCallbackBase()
-									+ GoogleOAuthSuccessHandler.FAILURE_PATH)));
-		}
 		return http.build();
 	}
 

@@ -54,7 +54,7 @@ public class User {
 	/**
 	 * Phase 8A — BCrypt hash of the password. Never a raw password.
 	 * NULL during the credential transition for pre-auth rows and for
-	 * Google-only rows (Phase 18-B): null-hash rows cannot password-login.
+	 * historical Google-only rows: null-hash rows cannot password-login.
 	 * No public setter: written only through
 	 * {@link #assignCredentials(String, String)} on registration.
 	 */
@@ -62,12 +62,10 @@ public class User {
 	private String passwordHash;
 
 	/**
-	 * Phase 18-B — Google OIDC subject (the {@code sub} claim), the stable
-	 * provider identity anchor (see DECISIONS.md ADR-037). NULL for
-	 * email/password-only and pre-auth rows. Email is a mutable hint and
-	 * must never be the permanent OAuth identity. Insert-only like
-	 * {@code email}: assigned once at provisioning and never mutated
-	 * through dirty checking.
+	 * Legacy Google OIDC subject retained only so the existing V25 column
+	 * mapping stays intact. Google sign-in was removed in Phase 21-C; no
+	 * active code assigns or reads this field. NULL for email/password-only
+	 * and pre-auth rows. See DECISIONS.md ADR-037 for the historical design.
 	 */
 	@Column(name = "google_sub", nullable = true, updatable = false, length = 255)
 	private String googleSub;
@@ -92,24 +90,5 @@ public class User {
 		}
 		this.email = normalizedEmail;
 		this.passwordHash = passwordHash;
-	}
-
-	/**
-	 * Phase 18-B — provisions a Google-only account: normalized verified
-	 * email plus the Google subject, with no password hash (such rows
-	 * cannot password-login; login rejects null hashes uniformly).
-	 */
-	public void assignGoogleIdentity(String normalizedEmail, String googleSub) {
-		if (normalizedEmail == null || normalizedEmail.isBlank()) {
-			throw new IllegalArgumentException("Email must not be blank");
-		}
-		if (googleSub == null || googleSub.isBlank()) {
-			throw new IllegalArgumentException("Google subject must not be blank");
-		}
-		if (this.email != null || this.passwordHash != null || this.googleSub != null) {
-			throw new IllegalStateException("Identity is already assigned");
-		}
-		this.email = normalizedEmail;
-		this.googleSub = googleSub;
 	}
 }
