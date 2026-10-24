@@ -104,10 +104,18 @@
 .reg-header {
   position: relative;
   z-index: 2;
+  width: 100%;
+}
+
+.reg-header-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 2.5rem);
   padding-block: 0.75rem;
 }
 
@@ -148,14 +156,16 @@
 }
 
 @media (min-width: 1024px) {
+  .reg-eyebrow,
+  .reg-panel-label {
+    text-transform: uppercase;
+  }
+
   .reg-main {
     grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-    gap: 2.5rem;
+    gap: 2rem;
     align-items: start;
-    /* The composition starts near the top, just below the header — the
-       eyebrow and the form card share this top line. Compact on desktop
-       so the scene does not glow past the form card on tall screens. */
-    padding-block: 3.5rem 1.25rem;
+    padding-block: 2rem 1rem;
   }
 }
 
@@ -258,7 +268,7 @@
 
 /* ---- Artwork: one prominent document card ------------------------------ */
 .reg-art {
-  margin-top: 2.25rem;
+  margin-top: 1.5rem;
   position: relative;
   min-width: 0;
   width: 100%;
@@ -266,7 +276,7 @@
 
 @media (min-width: 1024px) {
   .reg-art {
-    width: min(37.5rem, 100%);
+    width: min(34rem, 100%);
   }
 }
 
@@ -293,35 +303,29 @@
   filter: blur(46px);
   pointer-events: none;
   z-index: 0;
+  animation: reg-halo-pulse 9s ease-in-out infinite alternate;
+  transform-origin: 62% 26%;
 }
 
-.reg-doc-back {
-  position: absolute;
-  border-radius: 16px;
-  border: 1px solid rgba(155, 123, 234, 0.14);
-  background: rgba(13, 14, 22, 0.5);
-  box-shadow: 0 24px 48px -30px rgba(0, 0, 0, 0.6);
+@keyframes reg-halo-pulse {
+  from {
+    opacity: 0.72;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.04);
+  }
 }
 
-.reg-doc-back.is-far {
-  top: -1.25rem;
-  left: 3rem;
-  right: -1rem;
-  bottom: 2.25rem;
-  z-index: 1;
-}
-
-.reg-doc-back.is-near {
-  top: -0.625rem;
-  left: 1.5rem;
-  right: -0.5rem;
-  bottom: 1.125rem;
-  z-index: 2;
-  background: rgba(16, 18, 27, 0.62);
-  border-color: rgba(155, 123, 234, 0.2);
+@media (prefers-reduced-motion: reduce) {
+  .reg-doc-halo {
+    animation: none;
+  }
 }
 
 .reg-doc {
+  position: relative;
   position: relative;
   z-index: 3;
   margin: 0;
@@ -381,48 +385,91 @@
   white-space: nowrap;
 }
 
-.reg-bars {
+/* Body of the preview: one focused change. */
+.reg-doc-body {
+  margin-top: 1.375rem;
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
-  margin-top: 1.125rem;
+  gap: 1rem;
 }
 
-.reg-bars span {
-  height: 0.4375rem;
-  border-radius: 3px;
-  background: rgba(242, 240, 246, 0.13);
+.reg-doc-field {
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--reg-muted);
 }
 
-.reg-bars span.is-short {
-  width: 58%;
+.reg-doc-change {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
+  background: rgba(122, 59, 255, 0.08);
+  border: 1px solid rgba(155, 123, 234, 0.24);
 }
 
-.reg-changed {
-  margin-top: 1.25rem;
-  border-left: 2px solid var(--reg-accent-2);
-  background: rgba(122, 59, 255, 0.16);
-  border-radius: 0 8px 8px 0;
-  padding: 0.75rem 0.875rem;
+.reg-doc-old {
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--reg-faint);
+  text-decoration: line-through;
+  text-decoration-color: rgba(111, 116, 132, 0.5);
 }
 
-.reg-changed p {
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: var(--reg-ink);
+.reg-doc-arrow {
+  color: var(--reg-accent-2);
+  flex-shrink: 0;
 }
 
-.reg-changed-badge {
-  display: inline-block;
-  margin-top: 0.5rem;
-  font-size: 0.625rem;
+.reg-doc-new {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
   line-height: 1.2;
-  letter-spacing: 0.1em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--reg-accent-ink);
+  text-shadow: 0 0 24px rgba(155, 82, 251, 0.45);
+}
+
+.reg-doc-history {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--reg-muted);
+}
+
+.reg-doc-history svg {
+  color: var(--reg-accent-2);
+  flex-shrink: 0;
+}
+
+.reg-doc-history-count {
+  margin-left: auto;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--reg-accent-ink);
-  border: 1px solid rgba(155, 123, 234, 0.55);
-  border-radius: 5px;
-  padding: 0.2rem 0.45rem;
+  border: 1px solid rgba(155, 123, 234, 0.4);
+  border-radius: 6px;
+  padding: 0.1875rem 0.4375rem;
+}
+
+.reg-doc-badge {
+  align-self: flex-start;
+  font-size: 0.625rem;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: linear-gradient(135deg, #7a3bff, #9b52fb);
+  border-radius: 6px;
+  padding: 0.3125rem 0.5625rem;
+  box-shadow: 0 8px 18px -10px rgba(122, 59, 255, 0.6);
 }
 
 /* ---- Registration panel ----------------------------------------------- */
@@ -668,6 +715,16 @@
   transform: translateY(1px);
 }
 
+.reg-submit:focus-visible {
+  outline: 2px solid var(--reg-accent-ink);
+  outline-offset: 3px;
+}
+
+.reg-toggle:focus-visible {
+  outline: 2px solid var(--reg-accent-ink);
+  outline-offset: 2px;
+}
+
 .reg-submit:disabled {
   opacity: 0.65;
   cursor: not-allowed;
@@ -747,13 +804,12 @@
     padding: 1.25rem 1.375rem;
   }
 
-  .reg-bars {
+  .reg-doc-body {
     margin-top: 0.875rem;
-    gap: 0.5rem;
+    gap: 0.625rem;
   }
 
-  .reg-changed {
-    margin-top: 0.875rem;
+  .reg-doc-change {
     padding: 0.625rem 0.75rem;
   }
 
@@ -813,18 +869,17 @@
     padding: 1rem;
   }
 
-  .reg-bars {
+  .reg-doc-body {
     margin-top: 0.625rem;
-    gap: 0.375rem;
+    gap: 0.5rem;
   }
 
-  .reg-changed {
-    margin-top: 0.625rem;
+  .reg-doc-change {
     padding: 0.375rem 0.5rem;
   }
 
-  .reg-changed p {
-    font-size: 0.75rem;
+  .reg-doc-new {
+    font-size: 1.125rem;
   }
 
   .reg-panel {

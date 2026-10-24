@@ -146,17 +146,19 @@ export function RegisterPage() {
         </div>
 
         <header className="reg-header">
-          <Link
-            to={ROUTES.home}
-            className="flex min-h-11 items-center"
-            aria-label="SoubhNiyam — home"
-          >
-            <BrandMark />
-          </Link>
-          <Link to={ROUTES.home} className="reg-back">
-            <ArrowLeft size={16} aria-hidden="true" />
-            Back to overview
-          </Link>
+          <div className="reg-header-inner">
+            <Link
+              to={ROUTES.home}
+              className="flex min-h-11 items-center"
+              aria-label="SoubhNiyam — home"
+            >
+              <BrandMark />
+            </Link>
+            <Link to={ROUTES.home} className="reg-back">
+              <ArrowLeft size={16} aria-hidden="true" />
+              Back to overview
+            </Link>
+          </div>
         </header>
 
         <main className="reg-main">

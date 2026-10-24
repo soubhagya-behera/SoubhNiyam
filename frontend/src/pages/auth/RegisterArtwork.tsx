@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FileText } from 'lucide-react'
+import { ArrowRight, FileText, History } from 'lucide-react'
 
 /**
  * Decorative artwork for the registration scene: one primary policy
@@ -16,38 +16,49 @@ const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
 export function RegisterArtwork() {
   return (
     <div className="reg-art" aria-hidden="true">
-      <motion.div
-        className="reg-doc-stack"
-        initial={{ opacity: 0, y: 20 }}
+      <motion.figure
+        className="reg-doc"
+        initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: EASE, delay: 0.3 }}
+        transition={{ duration: 0.7, ease: EASE, delay: 0.42 }}
       >
         <div className="reg-doc-halo" />
-        <div className="reg-doc-back is-far" />
-        <div className="reg-doc-back is-near" />
-        <figure className="reg-doc">
           <div className="reg-doc-head">
             <span className="reg-doc-title">
               <FileText size={16} className="reg-doc-icon" />
               Policy update
             </span>
-            <span className="reg-doc-version">v2.5 · Current</span>
+            <span className="reg-doc-version">V2.5 · CURRENT</span>
           </div>
-          <div className="reg-bars">
-            <span />
-            <span className="is-short" />
-            <span />
+        <div className="reg-doc-body">
+          <p className="reg-doc-field">Data retention</p>
+
+          <div className="reg-doc-change">
+            <span className="reg-doc-old">12 months</span>
+            <ArrowRight
+              size={16}
+              aria-hidden="true"
+              className="reg-doc-arrow"
+            />
+            <motion.span
+              className="reg-doc-new"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, ease: EASE, delay: 0.72 }}
+            >
+              24 months
+            </motion.span>
           </div>
-          <div className="reg-changed">
-            <p>Retention updated to 24 months.</p>
-            <span className="reg-changed-badge">Changed</span>
+
+          <div className="reg-doc-history">
+            <History size={14} aria-hidden="true" />
+            <span>Version history</span>
+            <span className="reg-doc-history-count">1 change</span>
           </div>
-          <div className="reg-bars">
-            <span />
-            <span className="is-short" />
-          </div>
-        </figure>
-      </motion.div>
+
+          <span className="reg-doc-badge">Change detected</span>
+        </div>
+      </motion.figure>
     </div>
   )
 }
