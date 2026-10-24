@@ -139,14 +139,9 @@ export function RegisterPage() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="reg">
-        <div className="reg-glows" aria-hidden="true">
-          <div className="reg-glow reg-glow-violet" />
-          <div className="reg-glow reg-glow-blue" />
-        </div>
-
+      <div className="pie reg">
         <header className="reg-header">
-          <div className="reg-header-inner">
+          <div className="shell-frame reg-header-inner">
             <Link
               to={ROUTES.home}
               className="flex min-h-11 items-center"
@@ -171,7 +166,7 @@ export function RegisterPage() {
               variants={storyStagger}
             >
               <motion.p className="reg-eyebrow" variants={storyItem}>
-                Policy change intelligence
+                POLICY CHANGE INTELLIGENCE
               </motion.p>
 
               <h1 id="reg-title" className="reg-title" aria-label={`${TITLE_LEAD} ${TITLE_ACCENT}`}>
@@ -309,11 +304,7 @@ export function RegisterPage() {
                   </button>
                 </div>
 
-                <div className="reg-divider" role="separator" aria-orientation="horizontal">
-                  <span className="reg-divider-line" aria-hidden="true" />
-                  <span className="reg-divider-text">OR</span>
-                  <span className="reg-divider-line" aria-hidden="true" />
-                </div>
+                <div className="reg-divider" role="separator" aria-orientation="horizontal" aria-hidden="true" />
 
                 <p className="reg-signin">
                   Already have an account?{' '}
