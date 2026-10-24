@@ -111,7 +111,7 @@ export function AssessmentDetailPage() {
       {data ? (
         <>
           <Section title="Assessment">
-            <dl className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-3">
+            <dl className="grid grid-cols-1 gap-x-8 gap-y-8 lg:gap-y-6 sm:grid-cols-3">
               <div>
                 <dt className="type-label text-ink-faint">Band</dt>
                 <dd className="mt-3">

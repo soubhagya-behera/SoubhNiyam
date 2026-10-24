@@ -33,7 +33,7 @@ export function LatestImpactSection({
       ) : null}
 
       {latest ? (
-        <div className="border-y border-line py-8">
+        <div className="border-y border-line py-8 lg:py-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p

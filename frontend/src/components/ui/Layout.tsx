@@ -17,7 +17,7 @@ export function PageHeader({
   actions?: ReactNode
 }) {
   return (
-    <header className="border-b border-line pb-10">
+    <header className="border-b border-line pb-10 lg:pb-8">
       <p className="type-label text-accent-soft">{label}</p>
       <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
@@ -54,7 +54,7 @@ export function Section({
   className?: string
 }) {
   return (
-    <section className={cn('py-10', className)}>
+    <section className={cn('py-10 lg:py-7', className)}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="type-subheading text-ink">{title}</h2>

@@ -381,6 +381,16 @@
   border-bottom: 1px solid var(--pie-line);
 }
 
+@media (min-width: 1024px) {
+  .pie-problem-list {
+    margin-top: 1.75rem;
+  }
+
+  .pie-problem-list li {
+    padding-block: 1.25rem;
+  }
+}
+
 .pie-problem-item {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);

@@ -154,7 +154,7 @@
   .shell-frame {
     width: 100%;
     margin-inline: auto;
-    max-width: 1521px;
+    max-width: 1280px;
     padding-inline: 1.5rem;
   }
 
@@ -164,7 +164,7 @@
     }
   }
 
-  @media (min-width: 1180px) {
+  @media (min-width: 1024px) {
     .shell-frame {
       padding-inline: 3rem;
     }

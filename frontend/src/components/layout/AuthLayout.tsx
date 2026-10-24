@@ -24,7 +24,7 @@ export function AuthLayout({
   return (
     <div className="flex min-h-dvh flex-col bg-base">
       <header className="border-b border-line">
-        <div className="shell-frame flex h-16 items-center md:h-20">
+        <div className="shell-frame flex h-16 items-center md:h-20 lg:h-16">
           <Link
             to={ROUTES.home}
             className="flex min-h-11 items-center"
@@ -35,19 +35,19 @@ export function AuthLayout({
         </div>
       </header>
 
-      <main className="flex flex-1 items-center justify-center py-12 md:py-16">
+      <main className="flex flex-1 items-center justify-center py-12 md:py-16 lg:py-10">
         <div className="shell-frame">
           <div className="mx-auto w-full max-w-md">
             <p className="type-label text-accent-soft">Account</p>
             <h1 className="type-section mt-5 text-ink">{title}</h1>
             <p className="type-body mt-4 text-ink-muted">{subtitle}</p>
-            <div className="mt-10">{children}</div>
+            <div className="mt-10 lg:mt-8">{children}</div>
           </div>
         </div>
       </main>
 
       <footer className="border-t border-line">
-        <div className="shell-frame py-8">
+        <div className="shell-frame py-8 lg:py-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="font-body text-sm text-ink-ghost">
               SoubhNiyam — Policy Change Intelligence

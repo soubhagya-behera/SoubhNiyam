@@ -155,7 +155,7 @@ export function RecommendationDetailPage() {
       {facts ? (
         <>
           <Section title="Recommended action">
-            <dl className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-3">
+            <dl className="grid grid-cols-1 gap-x-8 gap-y-8 lg:gap-y-6 sm:grid-cols-3">
               <div>
                 <dt className="type-label text-ink-faint">Action</dt>
                 <dd className="mt-3 font-body text-base text-ink">
@@ -198,7 +198,7 @@ export function RecommendationDetailPage() {
           </Section>
 
           <Section title="Rule">
-            <dl className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-3">
+            <dl className="grid grid-cols-1 gap-x-8 gap-y-8 lg:gap-y-6 sm:grid-cols-3">
               <div>
                 <dt className="type-label text-ink-faint">Rule</dt>
                 <dd className="mt-3 font-body text-base text-ink">
@@ -221,7 +221,7 @@ export function RecommendationDetailPage() {
           </Section>
 
           <Section title="Source">
-            <dl className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-3">
+            <dl className="grid grid-cols-1 gap-x-8 gap-y-8 lg:gap-y-6 sm:grid-cols-3">
               <div>
                 <dt className="type-label text-ink-faint">Policy version</dt>
                 <dd className="mt-3 font-body text-base text-ink">

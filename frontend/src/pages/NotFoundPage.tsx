@@ -16,21 +16,21 @@ export function NotFoundPage() {
 
   return (
     <PageContainer>
-      <div className="mx-auto max-w-2xl py-12 md:py-20">
+      <div className="mx-auto max-w-2xl py-12 md:py-20 lg:py-10">
         <p className="type-label text-accent-soft">404</p>
         <h1 className="type-section mt-6 text-ink">Page not found</h1>
         <p className="type-body mt-6 text-ink-muted">
           The page you were looking for does not exist, or it has moved.
         </p>
 
-        <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+        <div className="mt-10 flex flex-col gap-3 sm:flex-row lg:mt-8">
           <LinkButton to={home}>Go back</LinkButton>
           <LinkButton to={ROUTES.policies} variant="secondary">
             View policies
           </LinkButton>
         </div>
 
-        <p className="mt-12 font-body text-sm text-ink-ghost">
+        <p className="mt-12 font-body text-sm text-ink-ghost lg:mt-8">
           Think this is a mistake?{' '}
           <Link
             to={ROUTES.home}

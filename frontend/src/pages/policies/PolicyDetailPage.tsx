@@ -334,7 +334,7 @@ export function PolicyDetailPage() {
       {data ? (
         <>
           <Section title="Current state">
-            <dl className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-3">
+            <dl className="grid grid-cols-1 gap-x-8 gap-y-8 lg:gap-y-6 sm:grid-cols-3">
               <div>
                 <dt className="type-label text-ink-faint">Status</dt>
                 <dd className="mt-3">
@@ -435,7 +435,7 @@ export function PolicyDetailPage() {
               title="Check result"
               description="The terminal outcome of the manual check just run."
             >
-              <dl className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-3">
+              <dl className="grid grid-cols-1 gap-x-8 gap-y-8 lg:gap-y-6 sm:grid-cols-3">
                 <div>
                   <dt className="type-label text-ink-faint">Outcome</dt>
                   <dd className="mt-3 font-body text-base text-ink">

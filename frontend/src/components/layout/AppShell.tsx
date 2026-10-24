@@ -37,7 +37,7 @@ export function AppShell() {
 export function SiteFooter() {
   return (
     <footer className="border-t border-line">
-      <div className="shell-frame py-10">
+      <div className="shell-frame py-10 lg:py-7">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="font-display text-base text-ink-muted">

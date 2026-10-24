@@ -48,12 +48,12 @@ export function PoliciesPage() {
       />
 
       {isFormOpen ? (
-        <section className="border-b border-line py-10">
+        <section className="border-b border-line py-10 lg:py-7">
           <h2 className="type-subheading text-ink">Add a policy</h2>
           <p className="type-body mt-2 text-ink-muted">
             Give the engine a document URL to watch.
           </p>
-          <div className="mt-8">
+          <div className="mt-8 lg:mt-6">
             <AddPolicyForm
               onCreated={() => {
                 policies.reload()

@@ -66,6 +66,15 @@
   }
 }
 
+/* Laptop/desktop compaction: keep the editorial rhythm but stop the
+   sections from eating a full laptop viewport. Phones and tablets keep
+   their spacing. */
+@media (min-width: 1024px) {
+  .pie-section {
+    padding-block: 4.5rem;
+  }
+}
+
 .pie-band {
   background-color: var(--pie-bg-2);
   border-block: 1px solid var(--pie-line);
@@ -198,7 +207,7 @@
 
 @media (min-width: 1024px) {
   .pie-nav-inner {
-    min-height: 4.5rem;
+    min-height: 4rem;
   }
 
   .pie-nav-center {
@@ -262,8 +271,10 @@
     grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
     align-items: center;
     gap: 2.5rem;
-    padding-block: 5.5rem 6rem;
-    min-height: min(92vh, 880px);
+    /* Compact the hero band: the forced 92vh/880px floor left the top
+       screen mostly empty air on laptops. */
+    padding-block: 4rem 4.5rem;
+    min-height: min(80vh, 780px);
   }
 }
 

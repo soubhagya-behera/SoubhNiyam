@@ -19,13 +19,13 @@ export function PolicyTable({ policies }: { policies: Policy[] }) {
       </caption>
       <thead>
         <tr className="border-y border-line">
-          <th scope="col" className="type-label py-4 pr-6 font-normal text-ink-faint">
+          <th scope="col" className="type-label py-4 pr-6 font-normal text-ink-faint lg:py-3">
             Policy
           </th>
-          <th scope="col" className="type-label w-[28%] py-4 pr-6 font-normal text-ink-faint">
+          <th scope="col" className="type-label w-[28%] py-4 pr-6 font-normal text-ink-faint lg:py-3">
             Status
           </th>
-          <th scope="col" className="type-label w-[22%] py-4 font-normal text-ink-faint">
+          <th scope="col" className="type-label w-[22%] py-4 font-normal text-ink-faint lg:py-3">
             Updated
           </th>
         </tr>
@@ -33,7 +33,7 @@ export function PolicyTable({ policies }: { policies: Policy[] }) {
       <tbody>
         {policies.map((policy) => (
           <tr key={policy.id} className="border-b border-line">
-            <td className="py-5 pr-6 align-top">
+            <td className="py-5 pr-6 align-top lg:py-3.5">
               <Link
                 to={policyDetailPath(policy.id)}
                 className="block transition-colors duration-150 ease-standard hover:text-accent-soft"
@@ -49,13 +49,13 @@ export function PolicyTable({ policies }: { policies: Policy[] }) {
                 </span>
               </Link>
             </td>
-            <td className="py-5 pr-6 align-top">
+            <td className="py-5 pr-6 align-top lg:py-3.5">
               <StatusChip
                 label={statusLabel(policy.status)}
                 tone={policy.status === 'ACTIVE' ? 'positive' : 'neutral'}
               />
             </td>
-            <td className="py-5 align-top">
+            <td className="py-5 align-top lg:py-3.5">
               <span className="font-body text-sm text-ink-muted">
                 <time dateTime={policy.updatedAt}>
                   {formatDateTime(policy.updatedAt)}

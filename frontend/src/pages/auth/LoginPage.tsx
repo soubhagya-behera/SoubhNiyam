@@ -75,7 +75,7 @@ export function LoginPage() {
       }
     >
       <form onSubmit={(event) => void onSubmit(event)} noValidate>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 lg:gap-5">
           {formError ? (
             <div
               role="alert"
@@ -116,7 +116,7 @@ export function LoginPage() {
         </div>
       </form>
 
-      <div className="mt-10 border-t border-line pt-8">
+      <div className="mt-10 border-t border-line pt-8 lg:mt-8 lg:pt-6">
         <LinkButton to={ROUTES.home} variant="ghost" fullWidth>
           Back to overview
         </LinkButton>

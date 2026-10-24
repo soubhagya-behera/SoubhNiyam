@@ -27,7 +27,7 @@ export function AppNavigation() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-base/95 backdrop-blur-sm">
       <div className="shell-frame">
-        <div className="flex h-16 items-center justify-between gap-4 md:h-20">
+        <div className="flex h-16 items-center justify-between gap-4 md:h-20 lg:h-16">
           <Link
             to={ROUTES.app}
             className="flex min-h-11 items-center"

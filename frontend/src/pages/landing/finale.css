@@ -111,14 +111,15 @@
   .pie-audience-list {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1.5rem;
+    margin-top: 2rem;
   }
 
   .pie-audience-list > li:nth-child(2) {
-    transform: translateY(3rem);
+    transform: translateY(1.5rem);
   }
 
   .pie-audience-wrap {
-    padding-bottom: 3rem;
+    padding-bottom: 2rem;
   }
 }
 
@@ -197,7 +198,7 @@
 @media (min-width: 1024px) {
   .pie-closing-grid {
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    padding-block: 6.5rem;
+    padding-block: 4.5rem;
   }
 }
 
@@ -237,7 +238,7 @@
 
 @media (min-width: 1024px) {
   .pie-echo {
-    min-height: 430px;
+    min-height: 380px;
   }
 
   .pie-echo-plate {
@@ -267,6 +268,12 @@
   border-top: 1px solid var(--pie-line);
   background-color: var(--pie-bg-2);
   padding-block: 3rem 2rem;
+}
+
+@media (min-width: 1024px) {
+  .pie-footer {
+    padding-block: 2.25rem 1.5rem;
+  }
 }
 
 .pie-footer-grid {

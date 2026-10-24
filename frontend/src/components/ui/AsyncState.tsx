@@ -58,7 +58,7 @@ export function EmptyState({
   action?: ReactNode
 }) {
   return (
-    <div className="border-y border-line py-12">
+    <div className="border-y border-line py-12 lg:py-8">
       <p className="type-subheading text-ink">{title}</p>
       <p className="type-body mt-2 max-w-prose text-ink-muted">{description}</p>
       {action ? <div className="mt-6">{action}</div> : null}

@@ -30,7 +30,7 @@ export function DashboardPage() {
       <HeroSection />
 
       {/* Headline figures */}
-      <section aria-label="Key figures" className="py-12 md:py-16">
+      <section aria-label="Key figures" className="py-12 md:py-16 lg:py-10">
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
           <StatFigure
             value={policies.isInitialLoading ? '—' : (policies.data?.length ?? 0)}
