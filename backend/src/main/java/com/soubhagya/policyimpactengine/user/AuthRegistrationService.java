@@ -56,7 +56,10 @@ public class AuthRegistrationService {
 			return new RegistrationResult(saved.getId(), saved.getEmail());
 		}
 		catch (DataIntegrityViolationException duplicate) {
-			throw convertedDuplicate(normalized, duplicate);
+			// The DB unique index is the final guard; a lost insert race must
+			// surface as the same 409 as the service-level check rather than a
+			// 500 or a raw constraint violation.
+			throw new DuplicateEmailException("Email is already registered");
 		}
 	}
 
@@ -92,9 +95,4 @@ public class AuthRegistrationService {
 		}
 	}
 
-	private RuntimeException convertedDuplicate(String normalized, DataIntegrityViolationException duplicate) {
-		return userRepository.findByEmail(normalized)
-				.map(existing -> (RuntimeException) new DuplicateEmailException("Email is already registered"))
-				.orElse(duplicate);
-	}
 }

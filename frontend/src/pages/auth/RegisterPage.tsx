@@ -83,7 +83,7 @@ function TitleLine({
 }
 
 export function RegisterPage() {
-  const { signUp, signIn, status } = useAuth()
+  const { signUp, status } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -118,20 +118,17 @@ export function RegisterPage() {
     setIsSubmitting(true)
     try {
       const created = await signUp(email.trim(), password)
-      // Registration issues no tokens, so sign in immediately and land on the
-      // overview the user came for.
-      await signIn(created.email, password)
-      navigate(ROUTES.app, { replace: true })
+      // Registration creates the account only; the user signs in explicitly
+      // from the login page instead of being authenticated here.
+      navigate(ROUTES.login, {
+        replace: true,
+        state: { registrationSuccess: true, email: created.email },
+      })
     } catch (error) {
       if (isApiError(error)) {
         setFieldErrors(error.fieldErrors)
-        if (error.status === 409) {
-          setFormError('An account with that email already exists.')
-        }
       }
-      if (!isApiError(error) || error.status !== 409) {
-        setFormError(toErrorMessage(error))
-      }
+      setFormError(toErrorMessage(error))
     } finally {
       setIsSubmitting(false)
     }

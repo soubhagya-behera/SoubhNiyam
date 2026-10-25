@@ -69,7 +69,16 @@ export function LoginPage() {
   const { signIn, status } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [email, setEmail] = useState('')
+  const registrationState = location.state as
+    | { registrationSuccess?: boolean; email?: string }
+    | null
+  const registrationMessage =
+    registrationState?.registrationSuccess === true
+      ? 'Account created successfully. Please sign in.'
+      : null
+  const [email, setEmail] = useState(() =>
+    typeof registrationState?.email === 'string' ? registrationState.email : '',
+  )
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -267,6 +276,11 @@ export function LoginPage() {
                     variants={panelItem}
                   >
                     <div className="log-field">
+                      {registrationMessage ? (
+                        <div role="status" className="log-success">
+                          {registrationMessage}
+                        </div>
+                      ) : null}
                       {formError ? (
                         <div role="alert" className="log-alert">
                           {formError}
