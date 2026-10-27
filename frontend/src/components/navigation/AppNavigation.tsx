@@ -52,12 +52,6 @@ export function AppNavigation() {
                 {email}
               </span>
             ) : null}
-            <Link
-              to={ROUTES.privacy}
-              className="inline-flex min-h-11 items-center px-2 font-body text-base text-ink-muted transition-colors duration-150 ease-standard hover:text-ink"
-            >
-              Profile
-            </Link>
             <button
               type="button"
               onClick={() => void signOut()}
@@ -102,12 +96,6 @@ export function AppNavigation() {
                 {email}
               </p>
             ) : null}
-            <NavLinkItem
-              to={ROUTES.privacy}
-              label="Profile"
-              className="w-full px-0"
-              onNavigate={close}
-            />
             <button
               type="button"
               onClick={() => {
