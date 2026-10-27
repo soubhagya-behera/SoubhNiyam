@@ -68,6 +68,47 @@ function expiryFrom(response: TokenResponse): number {
   return Math.floor(Date.now() / 1000) + response.expiresIn
 }
 
+interface RestorationFlight {
+  token: string
+  promise: Promise<TokenResponse>
+}
+
+let restorationFlight: RestorationFlight | null = null
+let restorationConsumers = 0
+
+function acquireRestorationFlight(token: string): RestorationFlight {
+  if (!restorationFlight || restorationFlight.token !== token) {
+    const promise = authApi.refresh(token)
+    // Attach a handler so a rejected rotation is never an unhandled
+    // rejection, even if every consumer has already been cleaned up.
+    void promise.catch(() => undefined)
+    restorationFlight = {
+      token,
+      promise,
+    }
+  }
+  restorationConsumers += 1
+  return restorationFlight
+}
+
+function releaseRestorationFlight(): void {
+  restorationConsumers = Math.max(0, restorationConsumers - 1)
+  if (restorationConsumers === 0 && restorationFlight) {
+    const flight = restorationFlight
+    void flight.promise.finally(() => {
+      if (restorationConsumers === 0 && restorationFlight === flight) {
+        restorationFlight = null
+      }
+    }).catch(() => undefined)
+  }
+}
+
+/** Test-only escape hatch for clearing module-level restoration state. */
+export function resetSessionRestorationForTests(): void {
+  restorationFlight = null
+  restorationConsumers = 0
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<StoredSession | null>(null)
   const [email, setEmail] = useState<string | null>(() => readStoredEmail())
@@ -155,6 +196,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 // Session restoration: a stored refresh token is enough to silently
   // re-establish the session on a hard reload.
+  //
+  // Single-flight: StrictMode mounts, cleans up, and remounts this provider in
+  // development. The refresh token is single-use on the backend, so each
+  // restoration attempt shares one in-flight request instead of rotating the
+  // token twice.
   useEffect(() => {
     let cancelled = false
     const stored = readRefreshToken()
@@ -163,10 +209,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
 
+    const flight = acquireRestorationFlight(stored)
+
     void (async () => {
       try {
-        const response = await authApi.refresh(stored)
+        const response = await flight.promise
         if (cancelled) return
+        // A newer login/logout may have replaced the stored token while this
+        // flight was in flight; do not overwrite that newer state.
+        if (readRefreshToken() !== stored) return
         applySession(
           {
             accessToken: response.accessToken,
@@ -175,15 +226,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
           readStoredEmail() ?? '',
         )
+        setIsRestoring(false)
       } catch {
-        if (!cancelled) clearSession()
+        if (cancelled) return
+        if (readRefreshToken() !== stored) return
+        clearSession()
+        setIsRestoring(false)
       } finally {
-        if (!cancelled) setIsRestoring(false)
+        if (!cancelled && restorationFlight?.token === stored) {
+          restorationFlight = null
+        }
       }
-    })()
+    })().catch(() => undefined)
 
     return () => {
       cancelled = true
+      releaseRestorationFlight()
     }
     // Restoration is a one-time initialisation step, not a state sync, so it
     // intentionally runs once on mount.
