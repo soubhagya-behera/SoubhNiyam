@@ -93,6 +93,8 @@
     /* Prevents horizontal overflow from oversized display type. */
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    /* Native controls (select popups, scrollbars) render in the dark theme. */
+    color-scheme: dark;
   }
 
   body {
@@ -129,6 +131,29 @@
   ::selection {
     background-color: var(--color-accent);
     color: var(--color-ink);
+  }
+
+  /* Native select controls: keep the closed control transparent like other
+     inputs, but force the opened option menu, selected option, and disabled
+     state to follow SoubhNiyam's dark theme and purple accent. */
+  select {
+    color-scheme: dark;
+    accent-color: var(--color-accent);
+  }
+
+  option,
+  optgroup {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  option:checked {
+    background-color: var(--color-accent);
+    color: var(--color-ink);
+  }
+
+  option:disabled {
+    color: var(--color-ink-ghost);
   }
 
   /* Honour the reduced-motion preference: collapse every transition and

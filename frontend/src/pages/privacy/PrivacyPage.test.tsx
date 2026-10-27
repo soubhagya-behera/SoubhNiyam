@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { PrivacyPreference } from '../../api/types'
 import {
   changedPreferences,
   isValidSensitivity,
   PrivacyPage,
+  SENSITIVITY_LEVELS,
   sensitivityChoiceLabel,
 } from './PrivacyPage'
 import {
@@ -98,6 +99,19 @@ describe('PrivacyPage editing', () => {
     ).toBeDefined()
   })
 
+  it('renders all sensitivity levels as readable options', async () => {
+    render(<PrivacyPage />)
+    await screen.findByText('Location')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
+
+    const select = locationSelect()
+    const options = within(select).getAllByRole('option')
+    expect(options).toHaveLength(SENSITIVITY_LEVELS.length)
+    expect(options.map((option) => option.textContent)).toEqual(
+      SENSITIVITY_LEVELS.map(sensitivityChoiceLabel),
+    )
+  })
   it('saves only changed preferences, then reloads and returns to read mode', async () => {
     mockedUpdate.mockResolvedValueOnce(UPDATED_PREFS)
     render(<PrivacyPage />)
@@ -105,7 +119,6 @@ describe('PrivacyPage editing', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
     fireEvent.change(locationSelect(), { target: { value: '5' } })
-
     const save = screen.getByRole('button', { name: 'Save' })
     expect(save).toHaveProperty('disabled', false)
     fireEvent.click(save)
