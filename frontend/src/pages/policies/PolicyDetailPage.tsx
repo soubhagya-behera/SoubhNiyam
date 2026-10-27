@@ -19,6 +19,7 @@ import {
   formatBytes,
   formatDateTime,
   formatDurationMs,
+  nextCheckDisplay,
   statusLabel,
 } from '../../lib/format'
 import { ROUTES } from '../../app/routes'
@@ -415,7 +416,7 @@ export function PolicyDetailPage() {
                   Next check:{' '}
                   {data.nextCheckAt ? (
                     <time dateTime={data.nextCheckAt}>
-                      {formatDateTime(data.nextCheckAt)}
+                      {nextCheckDisplay(data.nextCheckAt, data.status)}
                     </time>
                   ) : (
                     '—'

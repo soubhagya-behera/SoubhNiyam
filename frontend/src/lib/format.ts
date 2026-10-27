@@ -140,6 +140,19 @@ export function formatDateTime(iso: string | null): string {
   })
 }
 
+export function nextCheckDisplay(
+  iso: string | null,
+  status: PolicyStatus | null | undefined,
+  now: number = Date.now(),
+): string {
+  if (!iso) return '—'
+  const parsed = new Date(iso)
+  if (Number.isNaN(parsed.getTime())) return '—'
+  if (status === 'ARCHIVED') return 'Not scheduled (archived)'
+  const formatted = formatDateTime(iso)
+  return parsed.getTime() <= now ? `Overdue since ${formatted}` : formatted
+}
+
 /** Short relative age, e.g. `3 days ago`. */
 export function formatRelativeTime(iso: string | null): string {
   if (!iso) return '—'

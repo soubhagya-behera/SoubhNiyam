@@ -7,6 +7,7 @@ import {
   formatDateTime,
   formatDurationMs,
   maxImpactScoreDisplay,
+  nextCheckDisplay,
 } from './format'
 
 /**
@@ -140,5 +141,34 @@ describe('formatDateTime', () => {
     const rendered = formatDateTime('2026-10-07T10:00:00Z')
     expect(rendered).not.toBe('—')
     expect(rendered).toContain('2026')
+  })
+})
+
+describe('nextCheckDisplay', () => {
+  const now = Date.parse('2026-10-27T20:47:00Z')
+
+  it('shows a past eligibility time as overdue without inventing a future time', () => {
+    const nextCheckAt = '2026-10-27T20:38:00Z'
+    expect(nextCheckDisplay(nextCheckAt, 'ACTIVE', now)).toBe(
+      `Overdue since ${formatDateTime(nextCheckAt)}`,
+    )
+  })
+
+  it('shows a future eligibility time verbatim', () => {
+    const nextCheckAt = '2026-10-28T20:38:00Z'
+    expect(nextCheckDisplay(nextCheckAt, 'ACTIVE', now)).toBe(
+      formatDateTime(nextCheckAt),
+    )
+  })
+
+  it('does not present an archived policy as scheduled', () => {
+    expect(
+      nextCheckDisplay('2026-10-27T20:38:00Z', 'ARCHIVED', now),
+    ).toBe('Not scheduled (archived)')
+  })
+
+  it('renders missing and invalid timestamps as missing', () => {
+    expect(nextCheckDisplay(null, 'ACTIVE', now)).toBe('—')
+    expect(nextCheckDisplay('not-a-timestamp', 'ACTIVE', now)).toBe('—')
   })
 })

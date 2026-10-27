@@ -3,6 +3,7 @@ package com.soubhagya.policyimpactengine.policy.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -29,6 +30,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.soubhagya.policyimpactengine.audit.application.AuditVerificationService;
+import com.soubhagya.policyimpactengine.policy.domain.Policy;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyRepository;
 import com.soubhagya.policyimpactengine.policy.fetch.FetchResult;
 import com.soubhagya.policyimpactengine.policy.fetch.PolicyFetchException;
@@ -177,6 +179,31 @@ class PolicyCheckEndpointIntegrationTest {
 		assertThat(tableCount("notification")).isEqualTo(1);
 		assertThat(auditEventRepository.count()).isEqualTo(auditsBefore);
 		assertThat(verificationService.verify().isValid()).isTrue();
+	}
+
+	@Test
+	void manualChecksKeepPastScheduleAndOverviewReportsItVerbatim() throws Exception {
+		String token = registerAndLogin("check-stale-schedule@example.com");
+		UUID id = registerPolicy(token, "Stale", "https://stale.example/privacy");
+		Instant registeredAt = Instant.parse("2026-10-27T20:38:00Z");
+		Policy policy = policyRepository.findById(id).orElseThrow();
+		policy.setNextCheckAt(registeredAt);
+		policyRepository.saveAndFlush(policy);
+
+		checkExpect(token, id, "FIRST_VERSION", 1, "SUCCESS");
+		checkExpect(token, id, "UNCHANGED", 1, "SKIPPED_UNCHANGED");
+
+		mockMvc.perform(get("/api/v1/policies/{policyId}/overview", id)
+						.header("Authorization", "Bearer " + token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.nextCheckAt").value(registeredAt.toString()))
+				.andExpect(jsonPath("$.latestCheck.trigger").value("MANUAL"))
+				.andExpect(jsonPath("$.latestCheck.status").value("SKIPPED_UNCHANGED"));
+
+		assertThat(policyRepository.findById(id).orElseThrow().getNextCheckAt())
+				.isEqualTo(registeredAt);
+		assertThat(versionCount(id)).isEqualTo(1);
+		assertThat(attemptRows(id)).containsExactly("SUCCESS:MANUAL", "SKIPPED_UNCHANGED:MANUAL");
 	}
 
 	@Test
