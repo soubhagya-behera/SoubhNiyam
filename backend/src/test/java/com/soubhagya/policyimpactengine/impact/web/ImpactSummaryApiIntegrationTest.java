@@ -89,7 +89,7 @@ class ImpactSummaryApiIntegrationTest extends AssessmentRecommendationApiFixture
 				listing.getResponse().getContentAsString()).get(0);
 		JsonNode latest = objectMapper.readTree(
 				summary.getResponse().getContentAsString()).get("latest");
-		assertThat(latest.get("id").asText()).isEqualTo(newest.get("id").asText());
+		assertThat(latest.get("id").asString()).isEqualTo(newest.get("id").asString());
 		assertThat(latest).isEqualTo(newest);
 	}
 

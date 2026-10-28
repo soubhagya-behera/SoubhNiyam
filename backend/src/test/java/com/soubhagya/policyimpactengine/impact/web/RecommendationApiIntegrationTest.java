@@ -165,7 +165,7 @@ class RecommendationApiIntegrationTest extends AssessmentRecommendationApiFixtur
 		List<String> ids = new ArrayList<>();
 		for (JsonNode row : rows) {
 			assertThat(fieldNames(row)).isEqualTo(RECOMMENDATION_SUMMARY_FIELDS);
-			ids.add(row.get("id").asText());
+			ids.add(row.get("id").asString());
 		}
 		assertThat(ids).doesNotHaveDuplicates();
 	}
@@ -301,7 +301,7 @@ class RecommendationApiIntegrationTest extends AssessmentRecommendationApiFixtur
 				.andReturn();
 		JsonNode rows = objectMapper.readTree(recs.getResponse().getContentAsString());
 		for (JsonNode row : rows) {
-			assertThat(row.get("assessmentId").asText())
+			assertThat(row.get("assessmentId").asString())
 					.isEqualTo(assessment.getId().toString());
 		}
 
@@ -401,7 +401,7 @@ class RecommendationApiIntegrationTest extends AssessmentRecommendationApiFixtur
 		List<String> ids = new ArrayList<>();
 		for (JsonNode row : objectMapper.readTree(
 				result.getResponse().getContentAsString())) {
-			ids.add(row.get("id").asText());
+			ids.add(row.get("id").asString());
 		}
 		return ids;
 	}

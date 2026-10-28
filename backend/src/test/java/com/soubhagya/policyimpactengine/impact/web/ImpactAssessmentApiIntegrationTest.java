@@ -144,7 +144,7 @@ class ImpactAssessmentApiIntegrationTest extends AssessmentRecommendationApiFixt
 			assertThat(row.get("breakdowns")).isNull();
 		}
 		// No duplicate rows: distinct assessment ids.
-		assertThat(List.of(rows.get(0).get("id").asText(), rows.get(1).get("id").asText()))
+		assertThat(List.of(rows.get(0).get("id").asString(), rows.get(1).get("id").asString()))
 				.doesNotHaveDuplicates();
 	}
 
@@ -186,24 +186,24 @@ class ImpactAssessmentApiIntegrationTest extends AssessmentRecommendationApiFixt
 		// exact persisted values — the REST layer recomputes nothing.
 		JsonNode first = body.get("breakdowns").get(0);
 		assertThat(fieldNames(first)).isEqualTo(BREAKDOWN_FIELDS);
-		assertThat(first.get("changeImpactId").asText())
+		assertThat(first.get("changeImpactId").asString())
 				.isEqualTo(crafted.impact().getId().toString());
-		assertThat(first.get("conceptCode").asText()).isEqualTo("THIRD_PARTY_SHARING");
-		assertThat(first.get("changeType").asText()).isEqualTo("MODIFIED");
+		assertThat(first.get("conceptCode").asString()).isEqualTo("THIRD_PARTY_SHARING");
+		assertThat(first.get("changeType").asString()).isEqualTo("MODIFIED");
 		assertThat(first.get("systemNormalized").asInt())
 				.isEqualTo(crafted.impact().getNormalizedScore());
-		assertThat(first.get("systemBand").asText())
+		assertThat(first.get("systemBand").asString())
 				.isEqualTo(crafted.impact().getImpactBand().name());
 		assertThat(first.get("systemRulesVersion").asInt())
 				.isEqualTo(crafted.impact().getRulesVersion());
 		assertThat(first.get("effectiveSensitivity").asInt()).isEqualTo(3);
 		assertThat(first.get("personalizedNormalized").asInt()).isEqualTo(100);
-		assertThat(first.get("personalizedBand").asText())
+		assertThat(first.get("personalizedBand").asString())
 				.isEqualTo(ImpactBand.CRITICAL.name());
 		assertThat(first.get("personalizationRulesVersion").asInt()).isEqualTo(1);
 
 		JsonNode lower = body.get("breakdowns").get(1);
-		assertThat(lower.get("conceptCode").asText()).isEqualTo("ADVERTISING");
+		assertThat(lower.get("conceptCode").asString()).isEqualTo("ADVERTISING");
 		assertThat(lower.get("personalizedNormalized").asInt()).isEqualTo(70);
 
 		// Direct repository comparison: every exposed number equals the
@@ -215,9 +215,9 @@ class ImpactAssessmentApiIntegrationTest extends AssessmentRecommendationApiFixt
 		for (int i = 0; i < persisted.size(); i++) {
 			JsonNode row = body.get("breakdowns").get(i);
 			ImpactAssessmentBreakdown persistedRow = persisted.get(i);
-			assertThat(row.get("changeImpactId").asText())
+			assertThat(row.get("changeImpactId").asString())
 					.isEqualTo(persistedRow.getChangeImpact().getId().toString());
-			assertThat(row.get("conceptCode").asText())
+			assertThat(row.get("conceptCode").asString())
 					.isEqualTo(persistedRow.getConceptCode());
 			assertThat(row.get("systemNormalized").asInt())
 					.isEqualTo(persistedRow.getSystemNormalized());
@@ -383,7 +383,7 @@ class ImpactAssessmentApiIntegrationTest extends AssessmentRecommendationApiFixt
 		List<String> ids = new ArrayList<>();
 		for (JsonNode row : objectMapper.readTree(
 				result.getResponse().getContentAsString())) {
-			ids.add(row.get("id").asText());
+			ids.add(row.get("id").asString());
 		}
 		return ids;
 	}

@@ -76,7 +76,7 @@ class ChangeAssessmentApiIntegrationTest extends AssessmentRecommendationApiFixt
 				.andExpect(jsonPath("$.assessment.breakdowns.length()").value(1))
 				.andExpect(jsonPath("$.assessment.breakdowns[0].conceptCode").value("LOCATION"))
 				.andReturn();
-		assertThat(changesOf(first).get(0).get("changeImpactId").asText())
+		assertThat(changesOf(first).get(0).get("changeImpactId").asString())
 				.isEqualTo(crafted.impact().getId().toString());
 
 		// The second change of the same assessment carries only its
@@ -118,21 +118,21 @@ class ChangeAssessmentApiIntegrationTest extends AssessmentRecommendationApiFixt
 
 		JsonNode changeAssessment = bodyOf(changeView).get("assessment");
 		JsonNode detail = bodyOf(detailView);
-		assertThat(changeAssessment.get("id").asText()).isEqualTo(detail.get("id").asText());
-		assertThat(changeAssessment.get("policyId").asText())
-				.isEqualTo(detail.get("policyId").asText());
+		assertThat(changeAssessment.get("id").asString()).isEqualTo(detail.get("id").asString());
+		assertThat(changeAssessment.get("policyId").asString())
+				.isEqualTo(detail.get("policyId").asString());
 		assertThat(changeAssessment.get("versionNumber").asInt())
 				.isEqualTo(detail.get("versionNumber").asInt());
 		assertThat(changeAssessment.get("previousVersionNumber").asInt())
 				.isEqualTo(detail.get("previousVersionNumber").asInt());
 		assertThat(changeAssessment.get("aggregateScore").asInt())
 				.isEqualTo(detail.get("aggregateScore").asInt());
-		assertThat(changeAssessment.get("aggregateBand").asText())
-				.isEqualTo(detail.get("aggregateBand").asText());
+		assertThat(changeAssessment.get("aggregateBand").asString())
+				.isEqualTo(detail.get("aggregateBand").asString());
 		assertThat(changeAssessment.get("personalizationRulesVersion").asInt())
 				.isEqualTo(detail.get("personalizationRulesVersion").asInt());
-		assertThat(changeAssessment.get("createdAt").asText())
-				.isEqualTo(detail.get("createdAt").asText());
+		assertThat(changeAssessment.get("createdAt").asString())
+				.isEqualTo(detail.get("createdAt").asString());
 
 		// The single filtered breakdown is verbatim the matching row
 		// of the full detail response.
@@ -140,8 +140,8 @@ class ChangeAssessmentApiIntegrationTest extends AssessmentRecommendationApiFixt
 		JsonNode filtered = changeAssessment.get("breakdowns").get(0);
 		JsonNode match = null;
 		for (JsonNode candidate : detail.get("breakdowns")) {
-			if (candidate.get("changeImpactId").asText()
-					.equals(filtered.get("changeImpactId").asText())) {
+			if (candidate.get("changeImpactId").asString()
+					.equals(filtered.get("changeImpactId").asString())) {
 				match = candidate;
 			}
 		}

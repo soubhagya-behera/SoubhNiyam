@@ -164,11 +164,11 @@ abstract class AssessmentRecommendationApiFixture {
 	 */
 	protected void assertSortedNewestFirst(JsonNode rows) {
 		for (int i = 0; i + 1 < rows.size(); i++) {
-			Instant current = Instant.parse(rows.get(i).get("createdAt").asText());
-			Instant next = Instant.parse(rows.get(i + 1).get("createdAt").asText());
+			Instant current = Instant.parse(rows.get(i).get("createdAt").asString());
+			Instant next = Instant.parse(rows.get(i + 1).get("createdAt").asString());
 			if (current.equals(next)) {
-				assertThat(rows.get(i).get("id").asText())
-						.isGreaterThanOrEqualTo(rows.get(i + 1).get("id").asText());
+				assertThat(rows.get(i).get("id").asString())
+						.isGreaterThanOrEqualTo(rows.get(i + 1).get("id").asString());
 			}
 			else {
 				assertThat(current).isAfter(next);
@@ -196,7 +196,7 @@ abstract class AssessmentRecommendationApiFixture {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	protected User userFor(String email) {
