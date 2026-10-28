@@ -166,8 +166,8 @@ class AuditEventFeedIntegrationTest {
 		assertThat(rows).hasSize(2);
 		List<String> tied = new ArrayList<>();
 		for (JsonNode item : objectMapper.readTree(feed(token))) {
-			if (item.get("occurredAt").asText().startsWith("2026-09-18T10:00:00")) {
-				tied.add(item.get("id").asText());
+			if (item.get("occurredAt").asString().startsWith("2026-09-18T10:00:00")) {
+				tied.add(item.get("id").asString());
 			}
 		}
 		assertThat(tied).containsExactly(
@@ -223,20 +223,20 @@ class AuditEventFeedIntegrationTest {
 		JsonNode upserted = null;
 		JsonNode nullMetadata = null;
 		for (JsonNode item : feed) {
-			if (item.get("eventType").asText().equals("PRIVACY_PREFERENCE_UPSERTED")) {
+			if (item.get("eventType").asString().equals("PRIVACY_PREFERENCE_UPSERTED")) {
 				upserted = item;
 			}
-			if (item.get("eventType").asText().equals("AUTH_LOGIN_SUCCEEDED")
+			if (item.get("eventType").asString().equals("AUTH_LOGIN_SUCCEEDED")
 					&& item.get("metadata").isNull()) {
 				nullMetadata = item;
 			}
 		}
 
 		assertThat(upserted).isNotNull();
-		assertThat(upserted.get("metadata").asText()).isEqualTo(metadata);
-		assertThat(upserted.get("metadata").asText()).isEqualTo(persisted.get("metadata"));
-		assertThat(upserted.get("prevHash").asText()).isEqualTo(persisted.get("prev_hash"));
-		assertThat(upserted.get("eventHash").asText()).isEqualTo(persisted.get("event_hash"));
+		assertThat(upserted.get("metadata").asString()).isEqualTo(metadata);
+		assertThat(upserted.get("metadata").asString()).isEqualTo(persisted.get("metadata"));
+		assertThat(upserted.get("prevHash").asString()).isEqualTo(persisted.get("prev_hash"));
+		assertThat(upserted.get("eventHash").asString()).isEqualTo(persisted.get("event_hash"));
 		assertThat(nullMetadata).isNotNull();
 		assertThat(nullMetadata.get("resourceType").isNull()).isTrue();
 		assertThat(nullMetadata.get("resourceId").isNull()).isTrue();
@@ -295,8 +295,8 @@ class AuditEventFeedIntegrationTest {
 				"PRIVACY_PREFERENCE_DELETED");
 		JsonNode feed = objectMapper.readTree(body);
 		for (JsonNode item : feed) {
-			if (item.get("eventType").asText().equals("POLICY_OWNER_ASSIGNED")) {
-				assertThat(item.get("resourceId").asText()).isEqualTo(unowned.getId().toString());
+			if (item.get("eventType").asString().equals("POLICY_OWNER_ASSIGNED")) {
+				assertThat(item.get("resourceId").asString()).isEqualTo(unowned.getId().toString());
 			}
 		}
 	}
@@ -406,7 +406,7 @@ class AuditEventFeedIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private User userFor(String email) {
@@ -436,7 +436,7 @@ class AuditEventFeedIntegrationTest {
 	private List<String> typesIn(String body) throws Exception {
 		List<String> types = new ArrayList<>();
 		for (JsonNode item : objectMapper.readTree(body)) {
-			types.add(item.get("eventType").asText());
+			types.add(item.get("eventType").asString());
 		}
 		return types;
 	}
@@ -444,7 +444,7 @@ class AuditEventFeedIntegrationTest {
 	private List<String> idsIn(String body) throws Exception {
 		List<String> ids = new ArrayList<>();
 		for (JsonNode item : objectMapper.readTree(body)) {
-			ids.add(item.get("id").asText());
+			ids.add(item.get("id").asString());
 		}
 		return ids;
 	}
@@ -452,7 +452,7 @@ class AuditEventFeedIntegrationTest {
 	private List<String> occurredIn(String body) throws Exception {
 		List<String> instants = new ArrayList<>();
 		for (JsonNode item : objectMapper.readTree(body)) {
-			instants.add(item.get("occurredAt").asText());
+			instants.add(item.get("occurredAt").asString());
 		}
 		return instants;
 	}
@@ -460,8 +460,8 @@ class AuditEventFeedIntegrationTest {
 	private List<String> policyIdsIn(String body) throws Exception {
 		List<String> ids = new ArrayList<>();
 		for (JsonNode item : objectMapper.readTree(body)) {
-			if (item.get("eventType").asText().equals("POLICY_REGISTERED")) {
-				ids.add(item.get("resourceId").asText());
+			if (item.get("eventType").asString().equals("POLICY_REGISTERED")) {
+				ids.add(item.get("resourceId").asString());
 			}
 		}
 		return ids;
