@@ -142,6 +142,6 @@ class ActuatorExposureTest {
 				.andReturn();
 		return new tools.jackson.databind.ObjectMapper()
 				.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 }
