@@ -91,7 +91,7 @@ class RateLimitRefreshIntegrationTest {
 					.andExpect(jsonPath("$.tokenType").value("Bearer"))
 					.andReturn();
 			refresh = objectMapper.readTree(rotated.getResponse().getContentAsString())
-					.get("refreshToken").asText();
+					.get("refreshToken").asString();
 		}
 
 		mockMvc.perform(post("/api/v1/auth/refresh")
@@ -216,7 +216,7 @@ class RateLimitRefreshIntegrationTest {
 				.andExpect(jsonPath("$.tokenType").value("Bearer"))
 				.andReturn();
 		assertThat(objectMapper.readTree(rotated.getResponse().getContentAsString())
-				.get("refreshToken").asText()).isNotEqualTo(refresh);
+				.get("refreshToken").asString()).isNotEqualTo(refresh);
 	}
 
 	private String registerAndLogin(String email, RequestPostProcessor ip) throws Exception {
@@ -237,7 +237,7 @@ class RateLimitRefreshIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("refreshToken").asText();
+				.get("refreshToken").asString();
 	}
 
 	/**

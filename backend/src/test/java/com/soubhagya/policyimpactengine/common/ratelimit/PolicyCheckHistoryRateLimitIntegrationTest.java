@@ -127,7 +127,7 @@ class PolicyCheckHistoryRateLimitIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn();
 		return UUID.fromString(objectMapper
-				.readTree(result.getResponse().getContentAsString()).get("id").asText());
+				.readTree(result.getResponse().getContentAsString()).get("id").asString());
 	}
 
 	private String registerAndLogin(String email, RequestPostProcessor ip) throws Exception {
@@ -148,7 +148,7 @@ class PolicyCheckHistoryRateLimitIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private static RequestPostProcessor remoteIp(String address) {

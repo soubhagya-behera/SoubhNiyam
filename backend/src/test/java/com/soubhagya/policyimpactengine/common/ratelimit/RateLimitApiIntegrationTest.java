@@ -165,7 +165,7 @@ class RateLimitApiIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		String token = objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 		assertThat(token).isNotBlank();
 		return token;
 	}
