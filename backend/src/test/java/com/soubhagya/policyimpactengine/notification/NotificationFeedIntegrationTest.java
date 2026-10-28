@@ -291,7 +291,7 @@ class NotificationFeedIntegrationTest {
 				.andExpect(jsonPath("$.read").value(true))
 				.andReturn();
 		String firstReadAt = objectMapper.readTree(first.getResponse().getContentAsString())
-				.get("readAt").asText();
+				.get("readAt").asString();
 		assertThat(firstReadAt).isNotBlank();
 
 		MvcResult second = mockMvc.perform(
@@ -301,7 +301,7 @@ class NotificationFeedIntegrationTest {
 				.andExpect(jsonPath("$.read").value(true))
 				.andReturn();
 		String secondReadAt = objectMapper.readTree(second.getResponse().getContentAsString())
-				.get("readAt").asText();
+				.get("readAt").asString();
 
 		// PostgreSQL timestamptz rounds sub-microsecond values on
 		// persist, while the first response carries the in-memory
@@ -497,7 +497,7 @@ class NotificationFeedIntegrationTest {
 		List<String> ids = new ArrayList<>();
 		for (tools.jackson.databind.JsonNode row : objectMapper.readTree(
 				result.getResponse().getContentAsString())) {
-			ids.add(row.get("id").asText());
+			ids.add(row.get("id").asString());
 		}
 		return ids;
 	}
@@ -531,7 +531,7 @@ class NotificationFeedIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private User userFor(String email) {
