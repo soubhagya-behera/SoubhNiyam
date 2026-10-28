@@ -136,7 +136,7 @@ class PolicyCheckFanOutFailureIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn();
 		return UUID.fromString(objectMapper
-				.readTree(result.getResponse().getContentAsString()).get("id").asText());
+				.readTree(result.getResponse().getContentAsString()).get("id").asString());
 	}
 
 	private String registerAndLogin(String email) throws Exception {
@@ -155,7 +155,7 @@ class PolicyCheckFanOutFailureIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private int countWhere(String table, String column, UUID id) {

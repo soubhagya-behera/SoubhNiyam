@@ -113,7 +113,7 @@ class PolicyOwnershipIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn();
 		UUID id = UUID.fromString(objectMapper
-				.readTree(result.getResponse().getContentAsString()).get("id").asText());
+				.readTree(result.getResponse().getContentAsString()).get("id").asString());
 
 		assertThat(policyRepository.findById(id).orElseThrow().getOwner().getId())
 				.isEqualTo(userA.getId());
@@ -252,7 +252,7 @@ class PolicyOwnershipIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn();
 		return UUID.fromString(objectMapper
-				.readTree(result.getResponse().getContentAsString()).get("id").asText());
+				.readTree(result.getResponse().getContentAsString()).get("id").asString());
 	}
 
 	private String registerAndLogin(String email) throws Exception {
@@ -271,7 +271,7 @@ class PolicyOwnershipIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private User userFor(String email) {

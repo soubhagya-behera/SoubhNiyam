@@ -130,7 +130,7 @@ class PolicyCheckEndpointIntegrationTest {
 				.andExpect(jsonPath("$.contentHash").isNotEmpty())
 				.andReturn();
 
-		String hash = body(result).get("contentHash").asText();
+		String hash = body(result).get("contentHash").asString();
 		assertThat(versionHash(id, 1)).isEqualTo(hash);
 		assertThat(attemptRows(id)).containsExactly("SUCCESS:MANUAL");
 		assertThat(versionCount(id)).isEqualTo(1);
@@ -253,7 +253,7 @@ class PolicyCheckEndpointIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn();
 		return UUID.fromString(objectMapper
-				.readTree(result.getResponse().getContentAsString()).get("id").asText());
+				.readTree(result.getResponse().getContentAsString()).get("id").asString());
 	}
 
 	private String registerAndLogin(String email) throws Exception {
@@ -272,7 +272,7 @@ class PolicyCheckEndpointIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private JsonNode body(MvcResult result) throws Exception {
