@@ -153,21 +153,21 @@ class ExplanationIntegrationTest {
 		String body = explain(fixture.token(), fixture.assessmentId());
 		JsonNode response = objectMapper.readTree(body);
 
-		assertThat(response.get("assessmentId").asText())
+		assertThat(response.get("assessmentId").asString())
 				.isEqualTo(fixture.assessmentId().toString());
-		assertThat(response.get("explanation").asText()).isEqualTo("Canned prose.");
+		assertThat(response.get("explanation").asString()).isEqualTo("Canned prose.");
 		assertThat(response.get("aggregateScore").asInt())
 				.isEqualTo(fixture.aggregateScore());
-		assertThat(response.get("aggregateBand").asText()).isEqualTo(fixture.band());
+		assertThat(response.get("aggregateBand").asString()).isEqualTo(fixture.band());
 		List<String> expectedActions = recommendationService
 				.listRecommendationResponses(fixture.userId()).stream()
 				.filter(row -> row.assessmentId().equals(fixture.assessmentId()))
 				.map(row -> row.actionKind())
 				.toList();
 		List<String> actualActions = new ArrayList<>();
-		response.get("actionKinds").forEach(node -> actualActions.add(node.asText()));
+		response.get("actionKinds").forEach(node -> actualActions.add(node.asString()));
 		assertThat(actualActions).isEqualTo(expectedActions);
-		assertThat(response.get("model").asText()).isEqualTo("stub-model");
+		assertThat(response.get("model").asString()).isEqualTo("stub-model");
 		assertThat(response.get("fallback").asBoolean()).isFalse();
 		assertThat(response.get("fallbackReason").isNull()).isTrue();
 	}
@@ -335,7 +335,7 @@ class ExplanationIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private PolicyObservationService observationService(PolicyFetcher fetcher) {
