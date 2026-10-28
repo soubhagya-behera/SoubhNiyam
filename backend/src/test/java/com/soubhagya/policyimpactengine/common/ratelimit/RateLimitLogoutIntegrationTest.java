@@ -199,7 +199,7 @@ class RateLimitLogoutIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private static org.springframework.test.web.servlet.request.RequestPostProcessor remoteIp(

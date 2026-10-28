@@ -166,7 +166,7 @@ class RateLimitAuthIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		String token = objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 
 		mockMvc.perform(post("/api/v1/auth/login")
 						.with(ip)
