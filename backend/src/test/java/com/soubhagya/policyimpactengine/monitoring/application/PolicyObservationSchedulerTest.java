@@ -31,9 +31,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptTrigger;
 import com.soubhagya.policyimpactengine.notification.application.NotificationFanOutService;
-import com.soubhagya.policyimpactengine.policy.application.PolicyObservationResult;
 import com.soubhagya.policyimpactengine.policy.application.PolicyObservationService;
-import com.soubhagya.policyimpactengine.policy.application.PolicyVersionObservationOutcome;
 import com.soubhagya.policyimpactengine.policy.domain.Policy;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyRepository;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyStatus;

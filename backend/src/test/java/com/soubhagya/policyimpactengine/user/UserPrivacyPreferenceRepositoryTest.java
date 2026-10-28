@@ -26,7 +26,6 @@ import com.soubhagya.policyimpactengine.user.domain.UserPrivacyPreferenceReposit
 import com.soubhagya.policyimpactengine.user.domain.UserRepository;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
 
 /**
  * Phase 2P — Testcontainers repo tests for User and preferences.

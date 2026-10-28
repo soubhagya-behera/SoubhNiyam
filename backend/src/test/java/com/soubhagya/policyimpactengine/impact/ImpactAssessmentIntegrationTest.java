@@ -33,7 +33,6 @@ import com.soubhagya.policyimpactengine.policy.domain.Policy;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyRepository;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyVersion;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyVersionRepository;
-import com.soubhagya.policyimpactengine.policy.fetch.DefaultPolicyTextNormalizer;
 import com.soubhagya.policyimpactengine.policy.fetch.Sha256PolicyContentHasher;
 import com.soubhagya.policyimpactengine.user.UserPrivacyPreferenceService;
 import com.soubhagya.policyimpactengine.user.UserService;

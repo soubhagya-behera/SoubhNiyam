@@ -30,7 +30,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.soubhagya.policyimpactengine.policy.application.PolicyVersionService;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyRepository;
-import com.soubhagya.policyimpactengine.policy.domain.PolicyVersion;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyVersionRepository;
 import com.soubhagya.policyimpactengine.user.domain.UserRepository;
 
