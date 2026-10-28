@@ -111,13 +111,13 @@ class PolicyVersionApiIntegrationTest {
 		List<Integer> numbers = versionsOf(result).stream()
 				.map(node -> node.get("versionNumber").asInt()).toList();
 		assertThat(numbers).containsExactly(1, 2, 3);
-		assertThat(versionsOf(result).get(0).get("policyId").asText())
+		assertThat(versionsOf(result).get(0).get("policyId").asString())
 				.isEqualTo(policyId.toString());
-		assertThat(versionsOf(result).get(0).get("contentHash").asText())
+		assertThat(versionsOf(result).get(0).get("contentHash").asString())
 				.isEqualTo(sha256Hex("first content"));
 		for (JsonNode node : versionsOf(result)) {
 			assertThat(node.has("normalizedContent")).isFalse();
-			assertThat(node.get("observedAt").asText()).isNotBlank();
+			assertThat(node.get("observedAt").asString()).isNotBlank();
 		}
 	}
 
@@ -297,7 +297,7 @@ class PolicyVersionApiIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private UUID registerPolicy(String token, RequestPostProcessor ip,
@@ -312,7 +312,7 @@ class PolicyVersionApiIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn();
 		return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
-				.get("id").asText());
+				.get("id").asString());
 	}
 
 	private void observe(UUID policyId, String... contents) {

@@ -124,9 +124,9 @@ class PolicyCheckHistoryIntegrationTest {
 				"SUCCESS", "IN_PROGRESS", "SKIPPED_UNCHANGED", "FAILED", "FAILED", "SUCCESS");
 		assertThat(rowValues(rows, "trigger")).containsExactly(
 				"SCHEDULED", "MANUAL", "SCHEDULED", "MANUAL", "SCHEDULED", "MANUAL");
-		assertThat(rows.get(3).get("failureKind").asText()).isEqualTo("TRANSIENT");
-		assertThat(rows.get(4).get("failureKind").asText()).isEqualTo("PERMANENT");
-		assertThat(rows.get(4).get("errorMessage").asText()).contains("HTTP 404");
+		assertThat(rows.get(3).get("failureKind").asString()).isEqualTo("TRANSIENT");
+		assertThat(rows.get(4).get("failureKind").asString()).isEqualTo("PERMANENT");
+		assertThat(rows.get(4).get("errorMessage").asString()).contains("HTTP 404");
 		assertThat(rows.get(4).get("httpStatus").asInt()).isEqualTo(404);
 		assertThat(rows.get(1).get("completedAt").isNull()).isTrue();
 		assertThat(rows.get(1).get("durationMs").isNull()).isTrue();
@@ -134,7 +134,7 @@ class PolicyCheckHistoryIntegrationTest {
 		assertThat(rows.get(0).get("attemptNumber").asInt()).isEqualTo(3);
 		assertThat(rows.get(0).has("policyId")).isFalse();
 		assertThat(rows.get(0).has("totalCount")).isFalse();
-		assertThat(rows.get(0).get("id").asText()).isNotBlank();
+		assertThat(rows.get(0).get("id").asString()).isNotBlank();
 		assertThat(policy.getOwner().getId().toString()).isEqualTo(ownerId.toString());
 	}
 
@@ -153,8 +153,8 @@ class PolicyCheckHistoryIntegrationTest {
 
 		var rows = objectMapper.readTree(result.getResponse().getContentAsString());
 		assertThat(rows.size()).isEqualTo(1);
-		assertThat(rows.get(0).get("status").asText()).isEqualTo("PENDING");
-		assertThat(rows.get(0).get("trigger").asText()).isEqualTo("SCHEDULED");
+		assertThat(rows.get(0).get("status").asString()).isEqualTo("PENDING");
+		assertThat(rows.get(0).get("trigger").asString()).isEqualTo("SCHEDULED");
 		assertThat(rows.get(0).get("completedAt").isNull()).isTrue();
 		assertThat(rows.get(0).get("durationMs").isNull()).isTrue();
 	}
@@ -185,7 +185,7 @@ class PolicyCheckHistoryIntegrationTest {
 		String newerFirst = first.getId().toString().compareTo(second.getId().toString()) > 0
 				? first.getId().toString()
 				: second.getId().toString();
-		assertThat(rows.get(0).get("id").asText()).isEqualTo(newerFirst);
+		assertThat(rows.get(0).get("id").asString()).isEqualTo(newerFirst);
 
 		MvcResult paged = mockMvc.perform(get("/api/v1/policies/{policyId}/checks", id)
 						.queryParam("page", "1")
@@ -195,7 +195,7 @@ class PolicyCheckHistoryIntegrationTest {
 				.andReturn();
 		var page = objectMapper.readTree(paged.getResponse().getContentAsString());
 		assertThat(page.size()).isEqualTo(1);
-		assertThat(page.get(0).get("id").asText()).isNotEqualTo(newerFirst);
+		assertThat(page.get(0).get("id").asString()).isNotEqualTo(newerFirst);
 	}
 
 	@Test
@@ -340,7 +340,7 @@ class PolicyCheckHistoryIntegrationTest {
 
 	private List<String> rowValues(JsonNode rows, String field) {
 		List<String> values = new ArrayList<>();
-		rows.forEach(row -> values.add(row.get(field).asText()));
+		rows.forEach(row -> values.add(row.get(field).asString()));
 		return values;
 	}
 
@@ -352,7 +352,7 @@ class PolicyCheckHistoryIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn();
 		return UUID.fromString(objectMapper
-				.readTree(result.getResponse().getContentAsString()).get("id").asText());
+				.readTree(result.getResponse().getContentAsString()).get("id").asString());
 	}
 
 	private String registerAndLogin(String email) throws Exception {
@@ -371,7 +371,7 @@ class PolicyCheckHistoryIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private UUID userIdOf(String email) {

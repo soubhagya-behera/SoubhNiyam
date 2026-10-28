@@ -127,10 +127,10 @@ class PolicyChangeDiffApiIntegrationTest {
 				.andExpect(jsonPath("$.changes.length()").value(2))
 				.andReturn();
 		List<JsonNode> firstRows = changesOf(first);
-		assertThat(firstRows.get(0).get("oldText").asText()).isEqualTo("line a");
-		assertThat(firstRows.get(0).get("newText").asText()).isEqualTo("line A");
+		assertThat(firstRows.get(0).get("oldText").asString()).isEqualTo("line a");
+		assertThat(firstRows.get(0).get("newText").asString()).isEqualTo("line A");
 		assertThat(firstRows.get(0).get("changeOrder").asInt()).isEqualTo(0);
-		assertThat(firstRows.get(1).get("newText").asText()).isEqualTo("extra");
+		assertThat(firstRows.get(1).get("newText").asString()).isEqualTo("extra");
 		assertThat(firstRows.get(1).get("changeOrder").asInt()).isEqualTo(1);
 
 		// The second transition carries only its own rows: transitions
@@ -304,7 +304,7 @@ class PolicyChangeDiffApiIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private UUID registerPolicy(String token, RequestPostProcessor ip,
@@ -319,7 +319,7 @@ class PolicyChangeDiffApiIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn();
 		return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
-				.get("id").asText());
+				.get("id").asString());
 	}
 
 	private List<PolicyVersion> observe(UUID policyId, String... contents) {

@@ -123,21 +123,21 @@ class PolicyChangeListApiIntegrationTest {
 		List<JsonNode> rows = rowsOf(result);
 		assertThat(rows.get(0).get("versionNumber").asInt()).isEqualTo(2);
 		assertThat(rows.get(0).get("changeOrder").asInt()).isEqualTo(0);
-		assertThat(rows.get(0).get("changeType").asText()).isEqualTo("MODIFIED");
-		assertThat(rows.get(0).get("oldText").asText()).isEqualTo("old one");
-		assertThat(rows.get(0).get("newText").asText()).isEqualTo("new one");
-		assertThat(rows.get(0).get("newVersionId").asText()).isEqualTo(v2Id.toString());
+		assertThat(rows.get(0).get("changeType").asString()).isEqualTo("MODIFIED");
+		assertThat(rows.get(0).get("oldText").asString()).isEqualTo("old one");
+		assertThat(rows.get(0).get("newText").asString()).isEqualTo("new one");
+		assertThat(rows.get(0).get("newVersionId").asString()).isEqualTo(v2Id.toString());
 		assertThat(rows.get(1).get("versionNumber").asInt()).isEqualTo(2);
 		assertThat(rows.get(1).get("changeOrder").asInt()).isEqualTo(1);
-		assertThat(rows.get(1).get("changeType").asText()).isEqualTo("ADDED");
+		assertThat(rows.get(1).get("changeType").asString()).isEqualTo("ADDED");
 		assertThat(rows.get(1).get("oldText").isNull()).isTrue();
 		assertThat(rows.get(2).get("versionNumber").asInt()).isEqualTo(3);
 		assertThat(rows.get(2).get("changeOrder").asInt()).isEqualTo(0);
-		assertThat(rows.get(2).get("changeType").asText()).isEqualTo("REMOVED");
+		assertThat(rows.get(2).get("changeType").asString()).isEqualTo("REMOVED");
 		assertThat(rows.get(2).get("newText").isNull()).isTrue();
-		assertThat(rows.get(2).get("newVersionId").asText()).isEqualTo(v3Id.toString());
+		assertThat(rows.get(2).get("newVersionId").asString()).isEqualTo(v3Id.toString());
 		for (JsonNode row : rows) {
-			assertThat(row.get("id").asText()).isNotBlank();
+			assertThat(row.get("id").asString()).isNotBlank();
 			assertThat(row.has("policyId")).isFalse();
 			assertThat(row.has("normalizedContent")).isFalse();
 			assertThat(row.has("contentHash")).isFalse();
@@ -283,7 +283,7 @@ class PolicyChangeListApiIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private UUID registerPolicy(String token, RequestPostProcessor ip,
@@ -298,7 +298,7 @@ class PolicyChangeListApiIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn();
 		return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
-				.get("id").asText());
+				.get("id").asString());
 	}
 
 	private List<PolicyVersion> observe(UUID policyId, String... contents) {

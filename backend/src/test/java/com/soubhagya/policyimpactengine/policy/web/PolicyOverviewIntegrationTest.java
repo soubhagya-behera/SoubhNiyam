@@ -125,23 +125,23 @@ class PolicyOverviewIntegrationTest {
 		attemptRepository.saveAndFlush(retried);
 		JsonNode body = overview(token, id);
 
-		assertThat(body.get("policyId").asText()).isEqualTo(id.toString());
-		assertThat(body.get("name").asText()).isEqualTo("Mapped");
-		assertThat(body.get("url").asText()).isEqualTo("https://mapped.example/privacy");
-		assertThat(body.get("status").asText()).isEqualTo("ACTIVE");
-		assertThat(body.get("nextCheckAt").asText())
+		assertThat(body.get("policyId").asString()).isEqualTo(id.toString());
+		assertThat(body.get("name").asString()).isEqualTo("Mapped");
+		assertThat(body.get("url").asString()).isEqualTo("https://mapped.example/privacy");
+		assertThat(body.get("status").asString()).isEqualTo("ACTIVE");
+		assertThat(body.get("nextCheckAt").asString())
 				.isEqualTo(policy.getNextCheckAt().toString());
 		assertThat(body.get("latestVersion").get("versionNumber").asInt()).isEqualTo(3);
-		assertThat(body.get("latestVersion").get("contentHash").asText()).hasSize(64);
-		assertThat(body.get("latestCheck").get("id").asText()).isEqualTo(retried.getId().toString());
-		assertThat(body.get("latestCheck").get("trigger").asText()).isEqualTo("MANUAL");
+		assertThat(body.get("latestVersion").get("contentHash").asString()).hasSize(64);
+		assertThat(body.get("latestCheck").get("id").asString()).isEqualTo(retried.getId().toString());
+		assertThat(body.get("latestCheck").get("trigger").asString()).isEqualTo("MANUAL");
 		assertThat(body.get("latestCheck").get("attemptNumber").asInt()).isEqualTo(2);
-		assertThat(body.get("latestCheck").get("status").asText()).isEqualTo("SUCCESS");
+		assertThat(body.get("latestCheck").get("status").asString()).isEqualTo("SUCCESS");
 		assertThat(body.get("latestCheck").get("failureKind").isNull()).isTrue();
 		assertThat(body.get("latestCheck").get("httpStatus").asInt()).isEqualTo(200);
 		assertThat(body.get("latestCheck").get("bytesFetched").asLong()).isEqualTo(4096L);
 		assertThat(body.get("latestCheck").get("durationMs").asLong()).isEqualTo(4000L);
-		assertThat(body.get("latestCheck").get("completedAt").asText())
+		assertThat(body.get("latestCheck").get("completedAt").asString())
 				.isEqualTo(T0.plusSeconds(34).toString());
 		assertThat(body.get("latestCheck").has("errorMessage")).isFalse();
 		assertThat(body.get("latestImpact").isNull()).isTrue();
@@ -157,8 +157,8 @@ class PolicyOverviewIntegrationTest {
 
 		JsonNode body = overview(token, id);
 
-		assertThat(body.get("status").asText()).isEqualTo("ACTIVE");
-		assertThat(body.get("nextCheckAt").asText()).isEqualTo(T0.plusSeconds(3600).toString());
+		assertThat(body.get("status").asString()).isEqualTo("ACTIVE");
+		assertThat(body.get("nextCheckAt").asString()).isEqualTo(T0.plusSeconds(3600).toString());
 		assertThat(body.get("latestVersion").isNull()).isTrue();
 		assertThat(body.get("latestCheck").isNull()).isTrue();
 		assertThat(body.get("latestImpact").isNull()).isTrue();
@@ -185,8 +185,8 @@ class PolicyOverviewIntegrationTest {
 		String expected = older.getId().toString().compareTo(sameInstant.getId().toString()) > 0
 				? older.getId().toString() : sameInstant.getId().toString();
 		JsonNode body = overview(token, id);
-		assertThat(body.get("latestCheck").get("id").asText()).isEqualTo(expected);
-		assertThat(body.get("latestCheck").get("status").asText()).isIn("SUCCESS", "SKIPPED_UNCHANGED");
+		assertThat(body.get("latestCheck").get("id").asString()).isEqualTo(expected);
+		assertThat(body.get("latestCheck").get("status").asString()).isIn("SUCCESS", "SKIPPED_UNCHANGED");
 	}
 
 	@Test
@@ -208,7 +208,7 @@ class PolicyOverviewIntegrationTest {
 		for (Policy policy : new Policy[] { pending, running }) {
 			JsonNode check = overview(token, policy.getId()).get("latestCheck");
 			assertThat(check.get("attemptNumber").asInt()).isEqualTo(2);
-			assertThat(check.get("status").asText()).isIn("PENDING", "IN_PROGRESS");
+			assertThat(check.get("status").asString()).isIn("PENDING", "IN_PROGRESS");
 			assertThat(check.get("failureKind").isNull()).isTrue();
 			assertThat(check.get("durationMs").isNull()).isTrue();
 			assertThat(check.get("completedAt").isNull()).isTrue();
@@ -249,8 +249,8 @@ class PolicyOverviewIntegrationTest {
 
 		JsonNode impact = overview(ownerToken, policy.getId()).get("latestImpact");
 		assertThat(impact.get("aggregateScore").asInt()).isEqualTo(expected.getAggregateScore());
-		assertThat(impact.get("band").asText()).isEqualTo(expected.getAggregateBand().name());
-		assertThat(impact.get("assessedAt").asText()).isEqualTo(expected.getCreatedAt().toString());
+		assertThat(impact.get("band").asString()).isEqualTo(expected.getAggregateBand().name());
+		assertThat(impact.get("assessedAt").asString()).isEqualTo(expected.getCreatedAt().toString());
 		assertThat(assessmentRepository.count()).isEqualTo(assessmentsBefore);
 	}
 
@@ -304,10 +304,10 @@ class PolicyOverviewIntegrationTest {
 
 		JsonNode body = overview(token, id);
 
-		assertThat(body.get("status").asText()).isEqualTo("ARCHIVED");
-		assertThat(body.get("nextCheckAt").asText()).isEqualTo(frozenSchedule.toString());
+		assertThat(body.get("status").asString()).isEqualTo("ARCHIVED");
+		assertThat(body.get("nextCheckAt").asString()).isEqualTo(frozenSchedule.toString());
 		assertThat(body.get("latestVersion").get("versionNumber").asInt()).isEqualTo(2);
-		assertThat(body.get("latestCheck").get("status").asText()).isEqualTo("SUCCESS");
+		assertThat(body.get("latestCheck").get("status").asString()).isEqualTo("SUCCESS");
 		assertThat(body.get("latestImpact").get("aggregateScore").asInt()).isEqualTo(42);
 		assertThat(policyRepository.count()).isEqualTo(policiesBefore);
 		assertThat(versionRepository.count()).isEqualTo(versionsBefore);
@@ -372,7 +372,7 @@ class PolicyOverviewIntegrationTest {
 				.andExpect(status().isCreated())
 				.andReturn();
 		return UUID.fromString(objectMapper
-				.readTree(result.getResponse().getContentAsString()).get("id").asText());
+				.readTree(result.getResponse().getContentAsString()).get("id").asString());
 	}
 
 	private String registerAndLogin(String email) throws Exception {
@@ -389,7 +389,7 @@ class PolicyOverviewIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private UUID userIdOf(String email) {
