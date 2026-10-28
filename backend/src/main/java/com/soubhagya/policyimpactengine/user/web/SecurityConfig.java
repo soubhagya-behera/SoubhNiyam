@@ -97,7 +97,7 @@ public class SecurityConfig {
 						.crossOriginOpenerPolicy(coop -> coop.policy(CrossOriginOpenerPolicy.SAME_ORIGIN))
 						.crossOriginResourcePolicy(corp -> corp.policy(CrossOriginResourcePolicy.SAME_ORIGIN))
 						.addHeaderWriter(new StrictTransportSecurityWriter())
-						.permissionsPolicy(permissions -> permissions.policy(PERMISSIONS_POLICY)))
+						.permissionsPolicyHeader(permissions -> permissions.policy(PERMISSIONS_POLICY)))
 				.authorizeHttpRequests(auth -> auth
 						.dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()

@@ -133,10 +133,10 @@ public final class OllamaExplanationProvider implements AiExplanationProvider {
 			return new ExplanationOutcome.Failure(FallbackReason.MALFORMED);
 		}
 		if (content == null || content.isNull() || content.isMissingNode()
-				|| !content.isTextual()) {
+				|| !content.isString()) {
 			return new ExplanationOutcome.Failure(FallbackReason.MALFORMED);
 		}
-		String text = content.asText();
+		String text = content.asString();
 		if (text.isBlank()) {
 			return new ExplanationOutcome.Failure(FallbackReason.EMPTY);
 		}
