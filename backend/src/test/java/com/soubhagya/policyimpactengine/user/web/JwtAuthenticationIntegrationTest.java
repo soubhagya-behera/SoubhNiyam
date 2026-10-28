@@ -130,7 +130,7 @@ class JwtAuthenticationIntegrationTest {
 				.andExpect(jsonPath("$.expiresIn").value(900))
 				.andReturn();
 		String token = objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 		assertThat(token).isNotBlank();
 
 		mockMvc.perform(get("/test/principal").header("Authorization", "Bearer " + token))
@@ -255,7 +255,7 @@ class JwtAuthenticationIntegrationTest {
 					.andExpect(status().isOk())
 					.andReturn();
 			token = objectMapper.readTree(login.getResponse().getContentAsString())
-					.get("accessToken").asText();
+					.get("accessToken").asString();
 		}
 		mockMvc.perform(get("/api/v1/policies")
 						.header("Authorization", "Bearer " + token))
@@ -278,7 +278,7 @@ class JwtAuthenticationIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private UUID registerUser(String email) throws Exception {

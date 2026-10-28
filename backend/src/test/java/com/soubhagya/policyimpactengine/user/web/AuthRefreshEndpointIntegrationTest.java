@@ -105,8 +105,8 @@ class AuthRefreshEndpointIntegrationTest {
 				.andReturn();
 
 		JsonNode body = objectMapper.readTree(refreshed.getResponse().getContentAsString());
-		String newAccess = body.get("accessToken").asText();
-		String newRefresh = body.get("refreshToken").asText();
+		String newAccess = body.get("accessToken").asString();
+		String newRefresh = body.get("refreshToken").asString();
 		assertThat(newRefresh).isNotEqualTo(refresh);
 		assertThat(jwtService.parseUserId(newAccess)).isEqualTo(ownerId);
 		assertThat(body.toString()).doesNotContain(refresh);
@@ -257,7 +257,7 @@ class AuthRefreshEndpointIntegrationTest {
 				.andReturn();
 
 		String access = objectMapper.readTree(result.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 		assertThat(jwtService.parseUserId(access)).isEqualTo(ownerId);
 	}
 
@@ -299,7 +299,7 @@ class AuthRefreshEndpointIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("refreshToken").asText();
+				.get("refreshToken").asString();
 	}
 
 	private static String generateRawToken() {

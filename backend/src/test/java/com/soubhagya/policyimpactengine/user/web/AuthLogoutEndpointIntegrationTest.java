@@ -185,7 +185,7 @@ class AuthLogoutEndpointIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		String second = objectMapper.readTree(rotated.getResponse().getContentAsString())
-				.get("refreshToken").asText();
+				.get("refreshToken").asString();
 
 		mockMvc.perform(post("/api/v1/auth/logout")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -268,7 +268,7 @@ class AuthLogoutEndpointIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("refreshToken").asText();
+				.get("refreshToken").asString();
 	}
 
 	private UUID userIdOf(String email) {

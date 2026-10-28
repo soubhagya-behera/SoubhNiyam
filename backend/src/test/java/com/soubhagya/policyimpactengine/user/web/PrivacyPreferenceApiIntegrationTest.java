@@ -161,10 +161,10 @@ class PrivacyPreferenceApiIntegrationTest {
 		List<String> actualCodes = new ArrayList<>();
 		for (int i = 0; i < expectedCodes.size(); i++) {
 			String code = objectMapper.readTree(result.getResponse().getContentAsString())
-					.get(i).get("conceptCode").asText();
+					.get(i).get("conceptCode").asString();
 			actualCodes.add(code);
 			var item = objectMapper.readTree(result.getResponse().getContentAsString()).get(i);
-			assertThat(item.get("label").asText()).isNotBlank();
+			assertThat(item.get("label").asString()).isNotBlank();
 			assertThat(item.get("explicit").asBoolean()).isFalse();
 			int effective = item.get("effectiveSensitivity").asInt();
 			int def = conceptRepository.findByCode(code).orElseThrow().getDefaultSensitivity();
@@ -382,7 +382,7 @@ class PrivacyPreferenceApiIntegrationTest {
 	private tools.jackson.databind.JsonNode locationItem(MvcResult result, String code) throws Exception {
 		var tree = objectMapper.readTree(result.getResponse().getContentAsString());
 		for (var item : tree) {
-			if (code.equals(item.get("conceptCode").asText())) {
+			if (code.equals(item.get("conceptCode").asString())) {
 				return item;
 			}
 		}
@@ -405,7 +405,7 @@ class PrivacyPreferenceApiIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private User userFor(String email) {

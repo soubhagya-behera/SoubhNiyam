@@ -192,9 +192,9 @@ class AuthLogoutAllIntegrationTest {
 		UUID userId = userRepository.findByEmail(email).map(User::getId).orElseThrow();
 		return new Session(userId,
 				objectMapper.readTree(login.getResponse().getContentAsString())
-						.get("accessToken").asText(),
+						.get("accessToken").asString(),
 				objectMapper.readTree(login.getResponse().getContentAsString())
-						.get("refreshToken").asText());
+						.get("refreshToken").asString());
 	}
 
 	private int liveCount(UUID userId) {
