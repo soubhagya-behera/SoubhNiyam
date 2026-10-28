@@ -240,7 +240,7 @@ class PolicyRegistrationIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("accessToken").asText();
+				.get("accessToken").asString();
 	}
 
 	private String extractId(String json) {
@@ -361,7 +361,7 @@ class PolicyRegistrationIntegrationTest {
 		List<String> names = new ArrayList<>();
 		for (tools.jackson.databind.JsonNode row : objectMapper.readTree(
 				result.getResponse().getContentAsString())) {
-			names.add(row.get("name").asText());
+			names.add(row.get("name").asString());
 		}
 		return names;
 	}
