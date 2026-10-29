@@ -110,7 +110,7 @@ class PolicyFetchClassificationTest {
 				Duration.ofSeconds(1), Duration.ofMillis(300));
 
 		PolicyFetchException failure = catchThrowableOfType(
-				() -> fetcher.fetch(baseUrl + "/slow"), PolicyFetchException.class);
+				PolicyFetchException.class, () -> fetcher.fetch(baseUrl + "/slow"));
 
 		assertThat(failure.isTransientFailure()).isTrue();
 		assertThat(failure.getHttpStatus()).isNull();
@@ -122,7 +122,7 @@ class PolicyFetchClassificationTest {
 				Duration.ofMillis(500), Duration.ofMillis(500));
 
 		PolicyFetchException failure = catchThrowableOfType(
-				() -> fetcher.fetch("http://127.0.0.1:1/"), PolicyFetchException.class);
+				PolicyFetchException.class, () -> fetcher.fetch("http://127.0.0.1:1/"));
 
 		assertThat(failure.isTransientFailure()).isTrue();
 		assertThat(failure.getHttpStatus()).isNull();
@@ -134,7 +134,7 @@ class PolicyFetchClassificationTest {
 				Duration.ofSeconds(5), Duration.ofSeconds(10), 10L);
 
 		PolicyFetchException failure = catchThrowableOfType(
-				() -> fetcher.fetch(baseUrl + "/ok"), PolicyFetchException.class);
+				PolicyFetchException.class, () -> fetcher.fetch(baseUrl + "/ok"));
 
 		assertThat(failure.isTransientFailure()).isFalse();
 		assertThat(failure.getHttpStatus()).isEqualTo(200);
@@ -143,7 +143,7 @@ class PolicyFetchClassificationTest {
 	@Test
 	void blankUrlIsPermanentWithoutStatus() {
 		PolicyFetchException failure = catchThrowableOfType(
-				() -> new HttpPolicyFetcher().fetch("   "), PolicyFetchException.class);
+				PolicyFetchException.class, () -> new HttpPolicyFetcher().fetch("   "));
 
 		assertThat(failure.isTransientFailure()).isFalse();
 		assertThat(failure.getHttpStatus()).isNull();
@@ -152,7 +152,7 @@ class PolicyFetchClassificationTest {
 	@Test
 	void ssrfPolicyRejectionIsPermanent() {
 		PolicyFetchException failure = catchThrowableOfType(
-				() -> new HttpPolicyFetcher().fetch(baseUrl + "/ok"), PolicyFetchException.class);
+				PolicyFetchException.class, () -> new HttpPolicyFetcher().fetch(baseUrl + "/ok"));
 
 		assertThat(failure.isTransientFailure()).isFalse();
 		assertThat(failure.getHttpStatus()).isNull();
@@ -165,7 +165,7 @@ class PolicyFetchClassificationTest {
 		});
 
 		PolicyFetchException failure = catchThrowableOfType(
-				() -> guard.validateUrl("https://example.com/policy"), PolicyFetchException.class);
+				PolicyFetchException.class, () -> guard.validateUrl("https://example.com/policy"));
 
 		assertThat(failure.isTransientFailure()).isTrue();
 		assertThat(failure.getHttpStatus()).isNull();
@@ -176,7 +176,7 @@ class PolicyFetchClassificationTest {
 		SsrfGuard guard = new SsrfGuard(host -> new java.net.InetAddress[0]);
 
 		PolicyFetchException failure = catchThrowableOfType(
-				() -> guard.validateUrl("https://example.com/policy"), PolicyFetchException.class);
+				PolicyFetchException.class, () -> guard.validateUrl("https://example.com/policy"));
 
 		assertThat(failure.isTransientFailure()).isTrue();
 	}
@@ -192,7 +192,7 @@ class PolicyFetchClassificationTest {
 
 	private PolicyFetchException fetchFailure(String url) {
 		return catchThrowableOfType(
-				() -> permissiveFetcher().fetch(url), PolicyFetchException.class);
+				PolicyFetchException.class, () -> permissiveFetcher().fetch(url));
 	}
 
 	private HttpPolicyFetcher permissiveFetcher() {
