@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.Duration;
 import java.util.List;
 import java.util.Random;
-import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -136,7 +135,6 @@ class ImpactPersistenceIntegrationTest {
 			// Traceability: impact → match → change → old/new text contains matched fragment
 			assertThat(imp.getMatch()).isNotNull();
 			assertThat(imp.getMatch().getMatchedFragment()).isNotBlank();
-			String changeText = imp.getMatch().getChange().getNewText() != null ? imp.getMatch().getChange().getNewText() : imp.getMatch().getChange().getOldText();
 			// matchedFragment must be substring of either old or new of the change
 			boolean inOld = imp.getMatch().getChange().getOldText() != null && imp.getMatch().getChange().getOldText().contains(imp.getMatch().getMatchedFragment());
 			boolean inNew = imp.getMatch().getChange().getNewText() != null && imp.getMatch().getChange().getNewText().contains(imp.getMatch().getMatchedFragment());

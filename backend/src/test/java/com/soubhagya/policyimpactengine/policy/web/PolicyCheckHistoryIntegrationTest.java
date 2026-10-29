@@ -40,7 +40,6 @@ import com.soubhagya.policyimpactengine.policy.application.PolicyCheckHistoryRea
 import com.soubhagya.policyimpactengine.policy.domain.Policy;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyRepository;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyStatus;
-import com.soubhagya.policyimpactengine.user.domain.User;
 import com.soubhagya.policyimpactengine.user.domain.UserRepository;
 
 import tools.jackson.databind.JsonNode;

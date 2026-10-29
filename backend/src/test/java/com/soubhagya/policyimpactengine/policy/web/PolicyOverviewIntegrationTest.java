@@ -219,7 +219,7 @@ class PolicyOverviewIntegrationTest {
 	void latestImpactIsTheNewestRowForThisOwnerAndPolicyOnly() throws Exception {
 		String ownerToken = registerAndLogin("overview-impact@example.com");
 		UUID ownerId = userIdOf("overview-impact@example.com");
-		String strangerToken = registerAndLogin("overview-stranger@example.com");
+		registerAndLogin("overview-stranger@example.com");
 		UUID strangerId = userIdOf("overview-stranger@example.com");
 
 		Policy policy = policyRepository.findById(registerPolicy(ownerToken, "Scored",

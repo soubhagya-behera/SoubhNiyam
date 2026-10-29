@@ -75,7 +75,7 @@ class DeterministicConceptMatcherTest {
 	// 4. Negative / no-match case
 	@Test
 	void negativeNoMatchCase() {
-		PolicyChangeRecord change = change("This policy applies to all users.", "This policy applies to all users equally.");
+		change("This policy applies to all users.", "This policy applies to all users equally.");
 		// Both texts are generic, no concept keywords - but check empty or no match subset?
 		// Use non-concept wording
 		PolicyChangeRecord clean = change(null, "Hello world, this is a simple sentence about nothing relevant.");

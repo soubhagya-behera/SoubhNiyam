@@ -102,7 +102,6 @@ class DeterministicEffectiveSensitivityResolverTest {
 	@Test
 	void unknownConceptNotInResultUnlessInConceptsList() {
 		PrivacyConcept loc = concept("LOCATION", 3);
-		PrivacyConcept adv = concept("ADVERTISING", 3);
 		User u = user();
 		Map<String, Integer> map = resolver.resolveAll(List.of(new UserPrivacyPreference(u, loc, 5)), List.of(loc));
 		assertThat(map).doesNotContainKey("ADVERTISING");
