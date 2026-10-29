@@ -265,7 +265,4 @@ class PolicyCheckRejectionIntegrationTest {
 		return count == null ? 0 : count;
 	}
 
-	private Integer jdbcTemplateQuery(String sql, UUID id) {
-		return jdbcTemplate.queryForObject(sql, Integer.class, id);
-	}
 }

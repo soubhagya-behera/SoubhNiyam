@@ -31,7 +31,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.soubhagya.policyimpactengine.audit.application.AuditVerificationService;
 import com.soubhagya.policyimpactengine.audit.domain.AuditEventRepository;
-import com.soubhagya.policyimpactengine.user.JwtService;
 import com.soubhagya.policyimpactengine.user.domain.RefreshToken;
 import com.soubhagya.policyimpactengine.user.domain.RefreshTokenRepository;
 import com.soubhagya.policyimpactengine.user.domain.User;
@@ -76,9 +75,6 @@ class AuthLogoutEndpointIntegrationTest {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
-
-	@Autowired
-	private JwtService jwtService;
 
 	@Autowired
 	private AuditVerificationService verificationService;

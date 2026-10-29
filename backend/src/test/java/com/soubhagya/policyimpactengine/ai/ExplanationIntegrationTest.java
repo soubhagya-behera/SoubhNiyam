@@ -119,7 +119,6 @@ class ExplanationIntegrationTest {
 	// Phase 14-A/3a: refresh-first (user FK).
 	@Autowired
 	private com.soubhagya.policyimpactengine.user.domain.RefreshTokenRepository refreshTokenRepository;
-	@Autowired private AiExplanationService explanationService;
 	@Autowired private JdbcTemplate jdbcTemplate;
 	@Autowired private ObjectMapper objectMapper;
 
