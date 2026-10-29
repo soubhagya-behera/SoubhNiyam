@@ -155,7 +155,7 @@ class AuthRefreshReuseAuditFailureIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("refreshToken").asText();
+				.get("refreshToken").asString();
 	}
 
 	private int liveCount(UUID userId) {

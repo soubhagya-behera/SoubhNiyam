@@ -218,7 +218,7 @@ class AuthRefreshReuseEndpointIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		return objectMapper.readTree(login.getResponse().getContentAsString())
-				.get("refreshToken").asText();
+				.get("refreshToken").asString();
 	}
 
 	private UUID userIdOf(String email) {
