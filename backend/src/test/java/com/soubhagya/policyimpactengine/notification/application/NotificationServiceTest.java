@@ -199,7 +199,8 @@ class NotificationServiceTest {
 		when(assessmentRepository.findById(assessment.getId()))
 				.thenReturn(Optional.of(assessment));
 		when(notificationRepository.findByAssessment_Id(assessment.getId()))
-				.thenReturn(Optional.empty(), Optional.of(winner));
+				.thenReturn(Optional.empty())
+				.thenReturn(Optional.of(winner));
 		when(recommendationRepository
 				.findByAssessment_IdOrderByPersonalizedNormalizedDescRuleOrderAscConceptCodeAsc(
 						assessment.getId()))
