@@ -13,6 +13,7 @@ import com.soubhagya.policyimpactengine.policy.domain.PolicyRepository;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyStatus;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyVersion;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyVersionRepository;
+import com.soubhagya.policyimpactengine.recommendation.domain.Recommendation;
 import com.soubhagya.policyimpactengine.recommendation.RecommendationService;
 
 /**
@@ -133,7 +134,48 @@ public class NotificationFanOutService {
 						"Policy version " + result.versionNumber() + " for policy " + policyId
 								+ " not found"));
 		UUID newVersionId = newVersion.getId();
-		assessmentService.getOrCreateAssessment(ownerId, newVersionId);
-		recommendationService.getOrCreateRecommendations(ownerId, newVersionId);
+		fanOutVersion(policyId, newVersionId);
+	}
+
+	public FanOutResult fanOutVersion(UUID policyId, UUID policyVersionId) {
+		if (policyId == null) {
+			throw new IllegalArgumentException("Policy id must not be null");
+		}
+		if (policyVersionId == null) {
+			throw new IllegalArgumentException("Policy version id must not be null");
+		}
+		Policy policy = policyRepository.findById(policyId)
+				.orElseThrow(() -> new NoSuchElementException("Policy " + policyId + " not found"));
+		if (policy.getStatus() != PolicyStatus.ACTIVE) {
+			return new FanOutResult.Cancelled("policy is not active");
+		}
+		if (policy.getOwner() == null) {
+			return new FanOutResult.Cancelled("policy has no owner");
+		}
+		PolicyVersion version = versionRepository.findById(policyVersionId)
+				.orElseThrow(() -> new NoSuchElementException(
+						"Policy version " + policyVersionId + " not found"));
+		if (!version.getPolicy().getId().equals(policyId)) {
+			throw new IllegalArgumentException("Policy version does not belong to policy " + policyId);
+		}
+		if (version.getVersionNumber() < 2) {
+			return new FanOutResult.Cancelled("version has no transition to fan out");
+		}
+		UUID ownerId = policy.getOwner().getId();
+		try {
+			com.soubhagya.policyimpactengine.impact.domain.ImpactAssessment assessment =
+					assessmentService.getOrCreateAssessment(ownerId, policyVersionId);
+			java.util.List<com.soubhagya.policyimpactengine.recommendation.domain.Recommendation> recommendations =
+					recommendationService.getOrCreateRecommendations(ownerId, policyVersionId);
+			boolean actionable = recommendations.stream().anyMatch(row ->
+					!com.soubhagya.policyimpactengine.recommendation.FrozenRecommendationRules.RULE_REC_NONE_REQUIRED
+							.equals(row.getRuleId()));
+			if (actionable) {
+				return new FanOutResult.Processed(assessment.getId(), recommendations.size(), true);
+			}
+			return new FanOutResult.NoActionable(assessment.getId(), recommendations.size());
+		} catch (RuntimeException failure) {
+			throw failure;
+		}
 	}
 }
