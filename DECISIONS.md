@@ -344,6 +344,37 @@ Rules remain code-defined and versioned (`RECOMMENDATION_RULES_VERSION = 1`) and
 - Until authentication lands, ownership is assigned by explicit user ID at the service boundary; user-data isolation continues to rest on explicit-`userId` service calls, not on a principal.
 - Phase 10B-2 (authenticated notification REST feed) builds directly on this slice: it adds HTTP delivery of the records created here, without touching the fan-out contract.
 
+### ADR-016 refinement — Durable fan-out recovery (implemented through Phase 6 Batch 3)
+
+**Status:** Implemented through Phase 6 Batch 4; a configurable lease duration and an explicit authorized `FAILED` retry operation remain deferred.
+
+**Context:** QA Phases 1–5 identified that the ADR-016 healable gap is not automatically recoverable through normal application execution. Fan-out is invoked only for `NEW_VERSION`, while a later `UNCHANGED` check does not call `NotificationFanOutService.fanOut()`. The existing idempotency guards make repeated fan-out safe, but no automatic retry or reconciliation path exists. This refinement adds a durable recovery design without changing the existing observation, attempt, retry, or audit contracts.
+
+**Decision:**
+
+1. Durable task table: add `fan_out_task` (Flyway V28), with one row per `policy_version_id` via `UNIQUE(policy_version_id)`. The table records status, attempt count, retry timing, claim token, lease expiry, source attempt, timestamps, and last error.
+2. Atomic task creation: the `PENDING` task is inserted in the same transaction that persists a `NEW_VERSION`, so there is no crash window between version persistence and task creation.
+3. Exact-version replay: reconciliation and recovery use the exact persisted `policy_version_id`, not a reconstructed `PolicyObservationResult`.
+4. Common claim mechanism: manual synchronous, scheduled synchronous, and reconciliation processing all acquire the task through the same database-backed claim. A task is processed only by the worker whose claim token matches.
+5. Claim tokens and leases: each claim generates a token and lease expiry. All task-state updates require the current token. Expired-lease recovery resets only tasks whose attempts remain; exhausted tasks transition to `FAILED`.
+6. Structured result: `FanOutResult` distinguishes `Processed`, `NoActionable`, `Cancelled`, `RetryableFailure`, and `PermanentFailure`. `NoActionable` becomes `COMPLETED` without creating a notification.
+7. Idempotency: downstream assessment, recommendation, and notification creation remain get-or-create and are protected by existing database uniqueness constraints. Task-state fencing is supplemented by those constraints for at-least-once processing.
+8. Reconciliation scheduler: a separate scheduler processes `PENDING` tasks with bounded retries and per-task isolation. One policy's failure does not stop processing of unrelated policies.
+9. Retry policy: maximum 8 attempts; base delay 30 seconds; exponential backoff; 0–25% jitter; the 30-minute cap applies after jitter, so the actual maximum delay is 30 minutes; use an injected `Clock` for all time calculations.
+10. Dead-letter: `FAILED` is terminal. `FAILED -> PENDING` occurs only through an explicit authorized retry operation.
+11. Owner and privacy context: processing uses the current policy owner and current privacy preferences at processing time. `owner_user_id` on the task is diagnostic, not authoritative.
+12. Historical safety: no automatic backfill of existing versions. The reconciliation historical cutoff defaults to deployment time. Controlled QA v2 remains untouched unless explicitly approved.
+13. Audit: no new audit events are emitted by fan-out or reconciliation.
+14. Feature flag: the reconciliation feature flag disables only the reconciler. Atomic task creation and existing synchronous fan-out remain enabled.
+15. Archive lifecycle: the same transaction that transitions an owned policy `ACTIVE -> ARCHIVED` bulk-cancels every `PENDING` or `PROCESSING` fan-out task for that policy, setting `CANCELLED`, recording the archive reason, clearing `claim_token` and `lease_expires_at`, and stamping `updated_at` from the application `Clock`. Clearing the claim token fences any stale worker: late complete, renew, or fail calls update zero rows and cannot revive or complete the task. An in-flight worker that committed downstream assessment, recommendation, or notification stages before cancellation wins leaves those committed rows intact; once cancellation wins, no later task-state update can mark the task `COMPLETED`. No assessment, recommendation, or notification rows are deleted. Reactivation performs no task resurrection, and reconciliation never selects `CANCELLED` tasks unless an explicitly approved recovery operation resets them.
+16. Time source: the injected UTC application `Clock` is the single authoritative source for all fan-out time calculations and persisted task timestamps: `next_retry_at`, claim eligibility, lease expiry and renewal, expired-lease recovery, completion/failure timestamps, and retry scheduling. PostgreSQL `timestamptz` is storage precision only, not a competing scheduling clock. Application hosts and future replicas must run synchronised system clocks (for example NTP), because clock skew directly affects claim and lease boundaries.
+
+**Consequences:**
+
+- The accepted healable gap remains for synchronous fan-out failures, but a durable pending task and reconciliation scheduler provide an automatic recovery path.
+- Existing manual and scheduled check semantics remain unchanged.
+- Durable task creation, exact-version replay, claim/lease fencing, retry/dead-letter handling, the reconciliation scheduler, archive-time cancellation, and a single application-clock time source are implemented and covered by unit and Testcontainers tests. Lease-duration configurability and explicit authorized `FAILED` retry remain deferred.
+
 ---
 
 ## ADR-017 — Authentication & Security Foundation (Phase 8A)

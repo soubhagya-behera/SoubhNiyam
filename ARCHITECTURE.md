@@ -361,6 +361,54 @@ Notifications (Phase 10) close the loop between analysis and attention:
 - The feed supports read/unread state with an explicit "mark read" action; it is a record, not a message queue — no external broker is involved. **The REST feed endpoints are IMPLEMENTED (Phase 10B-2B, with Phase 8B authentication):** `GET /api/v1/me/notifications` (newest first), `GET /api/v1/me/notifications/unread` (unread only, newest first), and `POST /api/v1/me/notifications/{notificationId}/read` (idempotent mark-read returning the same resource/`readAt` on repeat). Identity comes only from `AuthenticatedUsers.requireUserId(authentication)`; the `notificationId` path variable is only the resource identifier. Cross-user access behaves as not-found (404, never 403); malformed UUIDs map to the existing 400 behavior; missing/invalid tokens map to the existing 401 behavior. DTO mapping runs inside the existing service transactions (no `EntityGraph`/fetch join in this slice; the per-row lazy-load cost is accepted for this bounded feed and pagination/index hardening belongs to Phase 13). No migration (V1–V16 unchanged).
 - Emission is part of the single pipeline completion path; both manual and scheduled checks produce notifications identically. **Automatic observation fan-out to the single policy owner is IMPLEMENTED (Phase 10B-1, service layer only); the authenticated REST feed is IMPLEMENTED (Phase 10B-2B).** A notification carries the assessment reference, and the assessment/recommendation details behind it are readable through the authenticated assessment/recommendation REST surface (IMPLEMENTED — see §28), closing the read-side loop from notification to explanation without touching emission.
 
+### Fan-out recovery (Phase 6 — implemented through Batch 3)
+
+The accepted healable gap in ADR-016 is addressed by the implemented recovery design. Batch 4 adds archive lifecycle safety and a single authoritative application clock; a configurable lease duration and an explicit authorized `FAILED` retry operation remain deferred:
+
+- A durable `fan_out_task` table (Flyway V28) has one row per `policy_version_id`.
+- A `PENDING` task is created atomically in the same transaction that persists a `NEW_VERSION`.
+- Reconciliation and recovery replay by exact persisted `policy_version_id`, not by reconstructed observation results.
+- Manual, scheduled, and reconciliation processing share one database-backed claim mechanism with claim tokens and processing leases.
+- Automatic reconciliation claims only `PENDING` tasks. `FAILED` is terminal except for explicit authorized retry.
+- All task-state updates require the current claim token; stale workers cannot update state.
+- Expired leases count as an unsuccessful attempt and receive retry backoff; expired leases at the maximum attempt count transition directly to `FAILED`.
+- Claim leases expire after five minutes; renewal requires the current claim token and supports an explicit extension. A worker must complete or fail before lease expiry.
+- The archive transaction cancels every outstanding `PENDING` or `PROCESSING` task for the policy, records the archive reason, and clears the claim token and lease expiry. Late complete, renew, or fail calls using the stale token update zero rows.
+- A cancelled task remains terminal: reactivation does not revive it, and reconciliation never selects it. Downstream assessment, recommendation, or notification stages already committed before cancellation wins remain; archive deletes none of them.
+- The injected UTC application `Clock` is authoritative for `next_retry_at`, claim eligibility, lease expiry and renewal, expired-lease recovery, completion/failure timestamps, and retry scheduling. PostgreSQL `timestamptz` is storage only. Hosts and future replicas must run synchronised system clocks because skew directly affects claim and lease boundaries.
+- `FanOutResult` distinguishes `Processed`, `NoActionable`, `Cancelled`, `RetryableFailure`, and `PermanentFailure`.
+- `NoActionable` becomes `COMPLETED` without creating a notification.
+- Existing assessment, recommendation, and notification uniqueness constraints remain the final duplicate-prevention layer for at-least-once processing.
+- A reconciliation scheduler processes `PENDING` tasks with bounded retries and per-task isolation.
+- Retry policy: 8 maximum attempts; 30-second base delay; exponential backoff; 0–25% jitter; the 30-minute cap applies after jitter, so the actual maximum delay is 30 minutes.
+- `FAILED` is terminal dead-letter; `FAILED -> PENDING` occurs only through explicit authorized retry.
+- Processing uses the current policy owner and current privacy preferences at processing time. `owner_user_id` on `fan_out_task` is diagnostic only.
+- No automatic historical backfill occurs; the historical cutoff defaults to deployment time.
+- No new audit events are emitted.
+- The reconciliation feature flag disables only the reconciler, not atomic task creation or synchronous fan-out.
+
+```mermaid
+sequenceDiagram
+    participant Obs as Observation
+    participant Task as FanOutTaskService
+    participant Sync as Manual/Scheduled Fan-Out
+    participant Rec as Reconciliation Scheduler
+    participant Down as Assessment/Recommendation/Notification
+
+    Obs->>Obs: Persist NEW_VERSION
+    Obs->>Task: Insert PENDING task (same transaction)
+    Sync->>Task: Claim task by token
+    alt claim acquired
+        Sync->>Down: Exact-version idempotent fan-out
+        Sync->>Task: Complete or retry/dead-letter
+    else claim not acquired
+        Sync-->>Task: Leave task pending
+    end
+    Rec->>Task: Claim pending task
+    Rec->>Down: Exact-version idempotent fan-out
+    Rec->>Task: Complete, retry, cancel, or dead-letter
+```
+
 ## 26. Audit Events
 
 Audit events (PLANNED, Phase 11) provide an immutable record of significant system events:

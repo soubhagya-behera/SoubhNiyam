@@ -691,6 +691,29 @@ silence, idempotency, V11/retry/stale intact, fan-out failure
 isolation with healing); documented in ADR-016; ARCHITECTURE.md
 §9/§25/§28 updated.
 
+Phase 6 fan-out recovery implemented through Batch 4:
+- Durable `fan_out_task` table (Flyway V28) with one row per
+`policy_version_id`.
+- Atomic `PENDING` task creation in the `NEW_VERSION` persistence
+transaction.
+- Exact persisted-version replay.
+- Common database-backed claim mechanism with claim tokens and leases.
+- Structured `FanOutResult`.
+- Reconciliation scheduler with 8 attempts, exponential backoff capped
+at 30 minutes, per-task isolation, and dead-letter handling; disabled
+by default via `fan-out.reconciliation.enabled=false`.
+- Archive cancels outstanding `PENDING` and `PROCESSING` tasks in the
+same transaction as the status transition, clears claim tokens/leases,
+and fences stale workers; reactivation never revives cancelled tasks.
+- The injected UTC application `Clock` is authoritative for all fan-out
+time calculations and persisted task timestamps; PostgreSQL
+`timestamptz` is storage only and hosts must keep synchronised clocks.
+- No automatic historical backfill.
+- No new audit events.
+- A configurable lease duration and explicit authorized `FAILED` retry
+remain deferred.
+- See ADR-016 refinement and ARCHITECTURE.md §25.
+
 Phase 10B-2B slice implemented and tested successfully
 (Phase 10B-2B = authenticated notification REST feed; no new ADR —
 ADR-015/ADR-016/ADR-018 already cover the architecture):
