@@ -135,7 +135,7 @@ class AuthLogoutServiceIntegrationTest {
 		AuthRefreshService refresh = refreshService(fixed(T0), LONG_TTL);
 		User user = userRepository.saveAndFlush(new User());
 		RefreshResult live = refresh.issueRefreshToken(user.getId());
-		AuthLogoutService logout = logoutService(Clock.systemUTC());
+		AuthLogoutService logout = logoutService(fixed(T0.plusSeconds(1)));
 
 		int threads = 8;
 		ExecutorService executor = Executors.newFixedThreadPool(threads);
