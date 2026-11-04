@@ -102,7 +102,7 @@ class PolicyArchiveDeleteRegressionTest {
 	@BeforeEach
 	void clean() {
 		auditEventRepository.deleteAll();
-		for (String table : List.of("notification", "recommendation",
+		for (String table : List.of("fan_out_task", "notification", "recommendation",
 				"impact_assessment_breakdown", "impact_assessment", "policy_fetch_attempt",
 				"change_impact", "change_concept_match", "policy_change", "policy_version",
 				"policy")) {

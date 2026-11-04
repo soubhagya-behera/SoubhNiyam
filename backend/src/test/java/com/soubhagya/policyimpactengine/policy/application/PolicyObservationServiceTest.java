@@ -105,7 +105,7 @@ class PolicyObservationServiceTest {
 		PolicyObservationResult stored = new PolicyObservationResult(
 				policy.getId(), PolicyVersionObservationOutcome.FIRST_VERSION, 1, "hash-1", Optional.empty(),
 				Optional.empty());
-		when(persistenceService.store(eq(policy.getId()), eq("We collect email."), eq("hash-1")))
+		when(persistenceService.store(eq(policy.getId()), eq("We collect email."), eq("hash-1"), any()))
 				.thenReturn(stored);
 		PolicyFetchAttempt attempt = startedAttempt(policy);
 		when(attemptService.markSucceeded(any(), eq(200),
@@ -128,7 +128,7 @@ class PolicyObservationServiceTest {
 		PolicyObservationResult stored = new PolicyObservationResult(
 				policy.getId(), PolicyVersionObservationOutcome.UNCHANGED, 1, "hash-same", Optional.empty(),
 				Optional.empty());
-		when(persistenceService.store(eq(policy.getId()), eq("same text"), eq("hash-same")))
+		when(persistenceService.store(eq(policy.getId()), eq("same text"), eq("hash-same"), any()))
 				.thenReturn(stored);
 		PolicyFetchAttempt attempt = startedAttempt(policy);
 		when(attemptService.markSkippedUnchanged(any(), eq(200), eq(byteLength("<html>same</html>"))))
@@ -150,7 +150,7 @@ class PolicyObservationServiceTest {
 		PolicyObservationResult stored = new PolicyObservationResult(
 				policy.getId(), PolicyVersionObservationOutcome.NEW_VERSION, 2, "hash-changed",
 				Optional.of(diff), Optional.empty());
-		when(persistenceService.store(eq(policy.getId()), eq("changed text"), eq("hash-changed")))
+		when(persistenceService.store(eq(policy.getId()), eq("changed text"), eq("hash-changed"), any()))
 				.thenReturn(stored);
 		PolicyFetchAttempt attempt = startedAttempt(policy);
 		when(attemptService.markSucceeded(any(), eq(200), eq(byteLength("<html>changed</html>"))))
@@ -266,7 +266,7 @@ class PolicyObservationServiceTest {
 	void suppliesExactNormalizedContentAndHashToPersistenceService() {
 		Policy policy = registeredPolicy("Acme Privacy Policy", "https://example.com/privacy");
 		stubPipeline(policy, "<html>raw</html>", "extracted text", "normalized text", "hash-exact");
-		when(persistenceService.store(eq(policy.getId()), eq("normalized text"), eq("hash-exact")))
+		when(persistenceService.store(eq(policy.getId()), eq("normalized text"), eq("hash-exact"), any()))
 				.thenReturn(new PolicyObservationResult(
 						policy.getId(), PolicyVersionObservationOutcome.FIRST_VERSION, 1, "hash-exact",
 						Optional.empty(), Optional.empty()));
@@ -278,7 +278,7 @@ class PolicyObservationServiceTest {
 
 		ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<String> hashCaptor = ArgumentCaptor.forClass(String.class);
-		verify(persistenceService).store(eq(policy.getId()), contentCaptor.capture(), hashCaptor.capture());
+		verify(persistenceService).store(eq(policy.getId()), contentCaptor.capture(), hashCaptor.capture(), any());
 		assertThat(contentCaptor.getValue()).isEqualTo("normalized text");
 		assertThat(hashCaptor.getValue()).isEqualTo("hash-exact");
 	}
@@ -293,7 +293,7 @@ class PolicyObservationServiceTest {
 		when(extractor.extract(html)).thenReturn("extracted");
 		when(normalizer.normalize("extracted")).thenReturn("normalized");
 		when(hasher.hash("normalized")).thenReturn("hash-ordered");
-		when(persistenceService.store(policy.getId(), "normalized", "hash-ordered"))
+		when(persistenceService.store(eq(policy.getId()), eq("normalized"), eq("hash-ordered"), any()))
 				.thenReturn(new PolicyObservationResult(
 						policy.getId(), PolicyVersionObservationOutcome.FIRST_VERSION, 1, "hash-ordered",
 						Optional.empty(), Optional.empty()));
@@ -310,7 +310,7 @@ class PolicyObservationServiceTest {
 		order.verify(extractor).extract(html);
 		order.verify(normalizer).normalize("extracted");
 		order.verify(hasher).hash("normalized");
-		order.verify(persistenceService).store(policy.getId(), "normalized", "hash-ordered");
+		order.verify(persistenceService).store(eq(policy.getId()), eq("normalized"), eq("hash-ordered"), any());
 		order.verify(attemptService).markSucceeded(any(), eq(200), eq(byteLength(html)));
 	}
 
@@ -318,7 +318,7 @@ class PolicyObservationServiceTest {
 	void persistenceFailureRecordsFailedAttemptAndRethrows() {
 		Policy policy = registeredPolicy("Acme Privacy Policy", "https://example.com/privacy");
 		stubPipeline(policy, "<html>persist</html>", "extracted", "normalized", "hash-persist");
-		when(persistenceService.store(eq(policy.getId()), eq("normalized"), eq("hash-persist")))
+		when(persistenceService.store(eq(policy.getId()), eq("normalized"), eq("hash-persist"), any()))
 				.thenThrow(new IllegalStateException("version store down"));
 		PolicyFetchAttempt attempt = startedAttempt(policy);
 		when(attemptService.markFailed(any(), eq(200), eq(byteLength("<html>persist</html>")),
@@ -429,7 +429,7 @@ class PolicyObservationServiceTest {
 		Instant failedAt = Instant.parse("2026-09-18T10:05:00Z");
 		Instant backoffAt = Instant.parse("2026-09-18T10:12:00Z");
 		stubPipeline(policy, "<html>persist</html>", "extracted", "normalized", "hash-persist");
-		when(persistenceService.store(eq(policy.getId()), eq("normalized"), eq("hash-persist")))
+		when(persistenceService.store(eq(policy.getId()), eq("normalized"), eq("hash-persist"), any()))
 				.thenThrow(new IllegalStateException("version store down"));
 		PolicyFetchAttempt failed = failedAttempt(policy,
 				PolicyFetchFailureKind.TRANSIENT, 2, failedAt);

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,6 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.soubhagya.policyimpactengine.diff.PolicyDiffResult;
 import com.soubhagya.policyimpactengine.diff.SimHashSimilarity;
 import com.soubhagya.policyimpactengine.impact.ImpactAssessmentService;
+import com.soubhagya.policyimpactengine.impact.domain.ImpactAssessment;
+import com.soubhagya.policyimpactengine.impact.domain.ImpactBand;
 import com.soubhagya.policyimpactengine.policy.application.PolicyObservationResult;
 import com.soubhagya.policyimpactengine.policy.application.PolicyVersionObservationOutcome;
 import com.soubhagya.policyimpactengine.policy.domain.Policy;
@@ -29,7 +32,10 @@ import com.soubhagya.policyimpactengine.policy.domain.PolicyRepository;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyStatus;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyVersion;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyVersionRepository;
+import com.soubhagya.policyimpactengine.recommendation.FrozenRecommendationRules;
 import com.soubhagya.policyimpactengine.recommendation.RecommendationService;
+import com.soubhagya.policyimpactengine.recommendation.domain.Recommendation;
+import com.soubhagya.policyimpactengine.recommendation.domain.RecommendationActionKind;
 import com.soubhagya.policyimpactengine.user.domain.User;
 
 /**
@@ -61,18 +67,31 @@ class NotificationFanOutServiceTest {
 	@Test
 	void newVersionWithOwnerRunsFullFlow() {
 		Policy policy = ownedPolicy(PolicyStatus.ACTIVE);
+		PolicyVersion previous = version(policy, 1);
 		PolicyVersion version = version(policy, 2);
+		ImpactAssessment assessment = assessment(policy, previous, version);
+		Recommendation recommendation = actionableRecommendation(assessment);
+		UUID ownerId = policy.getOwner().getId();
 		when(policyRepository.findById(policy.getId())).thenReturn(Optional.of(policy));
 		when(versionRepository.findByPolicy_IdAndVersionNumber(policy.getId(), 2))
 				.thenReturn(Optional.of(version));
+		when(versionRepository.findById(version.getId())).thenReturn(Optional.of(version));
+		when(assessmentService.getOrCreateAssessment(ownerId, version.getId()))
+				.thenReturn(assessment);
+		when(recommendationService.getOrCreateRecommendations(ownerId, version.getId()))
+				.thenReturn(List.of(recommendation));
 
 		fanOutService.fanOut(policy.getId(), result(policy.getId(),
 				PolicyVersionObservationOutcome.NEW_VERSION, 2));
 
 		verify(versionRepository).findByPolicy_IdAndVersionNumber(policy.getId(), 2);
-		verify(assessmentService).getOrCreateAssessment(policy.getOwner().getId(), version.getId());
-		verify(recommendationService)
-				.getOrCreateRecommendations(policy.getOwner().getId(), version.getId());
+		verify(versionRepository).findById(version.getId());
+		verify(assessmentService).getOrCreateAssessment(ownerId, version.getId());
+		verify(recommendationService).getOrCreateRecommendations(ownerId, version.getId());
+		org.assertj.core.api.Assertions.assertThat(assessment.getNewVersion().getId())
+				.isEqualTo(version.getId());
+		org.assertj.core.api.Assertions.assertThat(recommendation.getAssessment())
+				.isSameAs(assessment);
 	}
 
 	@Test
@@ -127,18 +146,31 @@ class NotificationFanOutServiceTest {
 	@Test
 	void versionIdDerivedThroughExistingQuery() {
 		Policy policy = ownedPolicy(PolicyStatus.ACTIVE);
+		PolicyVersion previous = version(policy, 4);
 		PolicyVersion version = version(policy, 5);
+		ImpactAssessment assessment = assessment(policy, previous, version);
+		Recommendation recommendation = actionableRecommendation(assessment);
+		UUID ownerId = policy.getOwner().getId();
 		when(policyRepository.findById(policy.getId())).thenReturn(Optional.of(policy));
 		when(versionRepository.findByPolicy_IdAndVersionNumber(policy.getId(), 5))
 				.thenReturn(Optional.of(version));
+		when(versionRepository.findById(version.getId())).thenReturn(Optional.of(version));
+		when(assessmentService.getOrCreateAssessment(ownerId, version.getId()))
+				.thenReturn(assessment);
+		when(recommendationService.getOrCreateRecommendations(ownerId, version.getId()))
+				.thenReturn(List.of(recommendation));
 
 		fanOutService.fanOut(policy.getId(), result(policy.getId(),
 				PolicyVersionObservationOutcome.NEW_VERSION, 5));
 
-		verify(assessmentService).getOrCreateAssessment(eq(policy.getOwner().getId()),
-				eq(version.getId()));
-		verify(recommendationService).getOrCreateRecommendations(eq(policy.getOwner().getId()),
-				eq(version.getId()));
+		verify(versionRepository).findByPolicy_IdAndVersionNumber(policy.getId(), 5);
+		verify(versionRepository).findById(version.getId());
+		verify(assessmentService).getOrCreateAssessment(eq(ownerId), eq(version.getId()));
+		verify(recommendationService).getOrCreateRecommendations(eq(ownerId), eq(version.getId()));
+		org.assertj.core.api.Assertions.assertThat(assessment.getNewVersion().getId())
+				.isEqualTo(version.getId());
+		org.assertj.core.api.Assertions.assertThat(recommendation.getAssessment())
+				.isSameAs(assessment);
 	}
 
 	@Test
@@ -172,6 +204,19 @@ class NotificationFanOutServiceTest {
 		assertThatThrownBy(() -> new NotificationFanOutService(policyRepository, null,
 				assessmentService, recommendationService))
 				.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	private ImpactAssessment assessment(Policy policy, PolicyVersion previous,
+			PolicyVersion version) {
+		return new ImpactAssessment(policy.getOwner(), version, previous, 100,
+				ImpactBand.CRITICAL, 1);
+	}
+
+	private Recommendation actionableRecommendation(ImpactAssessment assessment) {
+		return new Recommendation(assessment,
+				FrozenRecommendationRules.RULE_REC_REVIEW_SETTINGS, 3,
+				RecommendationActionKind.REVIEW_SETTINGS, "THIRD_PARTY_SHARING", 100,
+				ImpactBand.CRITICAL, FrozenRecommendationRules.RECOMMENDATION_RULES_VERSION);
 	}
 
 	private PolicyObservationResult result(UUID policyId,

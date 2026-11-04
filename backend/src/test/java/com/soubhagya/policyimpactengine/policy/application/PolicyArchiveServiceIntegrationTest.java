@@ -31,6 +31,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.soubhagya.policyimpactengine.audit.application.AuditAppendException;
 import com.soubhagya.policyimpactengine.audit.application.AuditService;
 import com.soubhagya.policyimpactengine.audit.domain.AuditEventRepository;
+import com.soubhagya.policyimpactengine.notification.domain.FanOutTaskRepository;
 import com.soubhagya.policyimpactengine.policy.domain.Policy;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyRepository;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyStatus;
@@ -60,6 +61,7 @@ class PolicyArchiveServiceIntegrationTest {
 	@Autowired private PolicyRepository policyRepository;
 	@Autowired private UserRepository userRepository;
 	@Autowired private AuditEventRepository auditEventRepository;
+	@Autowired private FanOutTaskRepository fanOutTaskRepository;
 	@Autowired private PlatformTransactionManager transactionManager;
 	@Autowired private JdbcTemplate jdbcTemplate;
 
@@ -190,7 +192,7 @@ class PolicyArchiveServiceIntegrationTest {
 		doThrow(new AuditAppendException("forced audit failure", null))
 				.when(failingAudit).append(any(), any(), any(), any(), any(), any());
 		PolicyArchiveService failingService = new PolicyArchiveService(policyRepository,
-				transactionManager, failingAudit);
+				transactionManager, failingAudit, fanOutTaskRepository, java.time.Clock.systemUTC());
 
 		assertThatThrownBy(() -> failingService.archive(owner.getId(), policy.getId()))
 				.isInstanceOf(AuditAppendException.class);
@@ -214,7 +216,7 @@ class PolicyArchiveServiceIntegrationTest {
 		Integer applied = jdbcTemplate.queryForObject(
 				"SELECT COUNT(*) FROM flyway_schema_history WHERE success = true",
 				Integer.class);
-		assertThat(applied).isEqualTo(27);
+		assertThat(applied).isEqualTo(28);
 
 		String definition = jdbcTemplate.queryForObject(
 				"SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = ?",

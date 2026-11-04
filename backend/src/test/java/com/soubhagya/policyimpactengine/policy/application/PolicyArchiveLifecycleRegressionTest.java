@@ -41,7 +41,9 @@ import com.soubhagya.policyimpactengine.monitoring.application.PolicyObservation
 import com.soubhagya.policyimpactengine.monitoring.application.RetryPolicy;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptRepository;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptTrigger;
+import com.soubhagya.policyimpactengine.notification.application.FanOutTaskService;
 import com.soubhagya.policyimpactengine.notification.application.NotificationFanOutService;
+import com.soubhagya.policyimpactengine.notification.domain.FanOutTaskRepository;
 import com.soubhagya.policyimpactengine.notification.domain.NotificationRepository;
 import com.soubhagya.policyimpactengine.policy.domain.Policy;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyRepository;
@@ -104,12 +106,14 @@ class PolicyArchiveLifecycleRegressionTest {
 	@Autowired private ImpactAssessmentBreakdownRepository breakdownRepository;
 	@Autowired private RecommendationRepository recommendationRepository;
 	@Autowired private NotificationRepository notificationRepository;
+	@Autowired private FanOutTaskRepository fanOutTaskRepository;
 	@Autowired private PolicyFetchAttemptRepository attemptRepository;
 	@Autowired private AuditEventRepository auditEventRepository;
 	@Autowired private UserRepository userRepository;
 	@Autowired private PolicyObservationPersistenceService persistenceService;
 	@Autowired private PolicyFetchAttemptService attemptService;
 	@Autowired private NotificationFanOutService fanOutService;
+	@Autowired private FanOutTaskService fanOutTaskService;
 	@Autowired private AuditVerificationService verificationService;
 	@Autowired private PlatformTransactionManager transactionManager;
 	@Autowired private JdbcTemplate jdbcTemplate;
@@ -125,6 +129,7 @@ class PolicyArchiveLifecycleRegressionTest {
 		recommendationRepository.deleteAll();
 		breakdownRepository.deleteAll();
 		assessmentRepository.deleteAll();
+		fanOutTaskRepository.deleteAll();
 		attemptRepository.deleteAll();
 		impactRepository.deleteAll();
 		matchRepository.deleteAll();
@@ -301,7 +306,7 @@ class PolicyArchiveLifecycleRegressionTest {
 
 	private PolicyObservationScheduler scheduler(PolicyFetcher fetcher) {
 		return new PolicyObservationScheduler(policyRepository, orchestrator(fetcher),
-				fanOutService, transactionManager, Clock.fixed(NOW, ZoneOffset.UTC), INTERVAL);
+				fanOutTaskService, transactionManager, Clock.fixed(NOW, ZoneOffset.UTC), INTERVAL);
 	}
 
 	private int countByType(String eventType) {

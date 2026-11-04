@@ -37,7 +37,7 @@ import com.soubhagya.policyimpactengine.monitoring.application.PolicyFetchAttemp
 import com.soubhagya.policyimpactengine.monitoring.application.PolicyFetchClaimRejectedException;
 import com.soubhagya.policyimpactengine.monitoring.application.PolicyObservationScheduler;
 import com.soubhagya.policyimpactengine.monitoring.application.RetryPolicy;
-import com.soubhagya.policyimpactengine.notification.application.NotificationFanOutService;
+import com.soubhagya.policyimpactengine.notification.application.FanOutTaskService;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttempt;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptRepository;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptStatus;
@@ -322,7 +322,7 @@ class PolicyFetchAttemptClaimIntegrationTest {
 		PolicyObservationService orchestrator = orchestrator(
 				countingFetcher(fetchCount, "<html><body><p>Never fetched.</p></body></html>"));
 		PolicyObservationScheduler scheduler = new PolicyObservationScheduler(policyRepository,
-				orchestrator, mock(NotificationFanOutService.class), transactionManager,
+				orchestrator, mock(FanOutTaskService.class), transactionManager,
 				Clock.fixed(tickStart, ZoneOffset.UTC), INTERVAL);
 
 		scheduler.checkDuePolicies();

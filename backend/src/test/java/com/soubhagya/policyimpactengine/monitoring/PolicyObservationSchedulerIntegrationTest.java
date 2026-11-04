@@ -28,7 +28,8 @@ import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttempt;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptRepository;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptStatus;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptTrigger;
-import com.soubhagya.policyimpactengine.notification.application.NotificationFanOutService;
+import com.soubhagya.policyimpactengine.notification.application.FanOutTaskService;
+import com.soubhagya.policyimpactengine.notification.domain.FanOutTaskRepository;
 import com.soubhagya.policyimpactengine.policy.application.PolicyObservationPersistenceService;
 import com.soubhagya.policyimpactengine.policy.application.PolicyObservationService;
 import com.soubhagya.policyimpactengine.policy.domain.Policy;
@@ -45,10 +46,8 @@ import com.soubhagya.policyimpactengine.policy.fetch.PolicyFetcher;
 import com.soubhagya.policyimpactengine.policy.fetch.PolicyTextNormalizer;
 import com.soubhagya.policyimpactengine.policy.fetch.Sha256PolicyContentHasher;
 import com.soubhagya.policyimpactengine.diff.domain.PolicyChangeRecordRepository;
-import com.soubhagya.policyimpactengine.impact.ImpactAssessmentService;
-import com.soubhagya.policyimpactengine.intelligence.domain.ChangeConceptMatchRepository;
 import com.soubhagya.policyimpactengine.impact.domain.ChangeImpactRepository;
-import com.soubhagya.policyimpactengine.recommendation.RecommendationService;
+import com.soubhagya.policyimpactengine.intelligence.domain.ChangeConceptMatchRepository;
 
 /**
  * Phase 2T — Testcontainers integration tests for the scheduled tick
@@ -75,8 +74,8 @@ class PolicyObservationSchedulerIntegrationTest {
 	@Autowired private PolicyFetchAttemptRepository attemptRepository;
 	@Autowired private PolicyFetchAttemptService attemptService;
 	@Autowired private PolicyObservationPersistenceService persistenceService;
-	@Autowired private ImpactAssessmentService assessmentService;
-	@Autowired private RecommendationService recommendationService;
+	@Autowired private FanOutTaskService fanOutTaskService;
+	@Autowired private FanOutTaskRepository fanOutTaskRepository;
 	@Autowired private PlatformTransactionManager transactionManager;
 
 	private final PolicyContentExtractor extractor = new JsoupPolicyContentExtractor();
@@ -85,6 +84,7 @@ class PolicyObservationSchedulerIntegrationTest {
 
 	@BeforeEach
 	void clean() {
+		fanOutTaskRepository.deleteAll();
 		attemptRepository.deleteAll();
 		impactRepository.deleteAll();
 		matchRepository.deleteAll();
@@ -199,9 +199,7 @@ class PolicyObservationSchedulerIntegrationTest {
 		PolicyObservationService orchestrator = new PolicyObservationService(policyRepository,
 				fetcher, extractor, normalizer, hasher, persistenceService, attemptService,
 				testRetryPolicy(), transactionManager);
-		NotificationFanOutService fanOut = new NotificationFanOutService(policyRepository,
-				versionRepository, assessmentService, recommendationService);
-		return new PolicyObservationScheduler(policyRepository, orchestrator, fanOut,
+		return new PolicyObservationScheduler(policyRepository, orchestrator, fanOutTaskService,
 				transactionManager, clock, INTERVAL);
 	}
 

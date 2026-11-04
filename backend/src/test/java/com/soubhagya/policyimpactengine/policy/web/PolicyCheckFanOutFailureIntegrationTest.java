@@ -82,6 +82,7 @@ class PolicyCheckFanOutFailureIntegrationTest {
 	@BeforeEach
 	void clean() {
 		auditEventRepository.deleteAll();
+		jdbcTemplate.update("DELETE FROM fan_out_task");
 		jdbcTemplate.update("DELETE FROM notification");
 		jdbcTemplate.update("DELETE FROM recommendation");
 		jdbcTemplate.update("DELETE FROM impact_assessment_breakdown");

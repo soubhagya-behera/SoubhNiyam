@@ -43,7 +43,9 @@ import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptRepo
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptStatus;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptTrigger;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchFailureKind;
+import com.soubhagya.policyimpactengine.notification.application.FanOutTaskService;
 import com.soubhagya.policyimpactengine.notification.application.NotificationFanOutService;
+import com.soubhagya.policyimpactengine.notification.domain.FanOutTaskRepository;
 import com.soubhagya.policyimpactengine.notification.domain.Notification;
 import com.soubhagya.policyimpactengine.notification.domain.NotificationRepository;
 import com.soubhagya.policyimpactengine.policy.application.PolicyObservationPersistenceService;
@@ -113,6 +115,7 @@ class PolicyOwnershipFanOutIntegrationTest {
 	@Autowired private ImpactAssessmentBreakdownRepository breakdownRepository;
 	@Autowired private RecommendationRepository recommendationRepository;
 	@Autowired private NotificationRepository notificationRepository;
+	@Autowired private FanOutTaskRepository fanOutTaskRepository;
 	@Autowired private PolicyFetchAttemptService attemptService;
 	@Autowired private PolicyObservationPersistenceService persistenceService;
 	@Autowired private ImpactAssessmentService assessmentService;
@@ -133,6 +136,7 @@ class PolicyOwnershipFanOutIntegrationTest {
 		recommendationRepository.deleteAll();
 		breakdownRepository.deleteAll();
 		assessmentRepository.deleteAll();
+		fanOutTaskRepository.deleteAll();
 		attemptRepository.deleteAll();
 		impactRepository.deleteAll();
 		matchRepository.deleteAll();
@@ -338,8 +342,11 @@ class PolicyOwnershipFanOutIntegrationTest {
 				.getOrCreateRecommendations(any(), any());
 		NotificationFanOutService failingFanOut = new NotificationFanOutService(
 				policyRepository, versionRepository, assessmentService, failingRecommendations);
+		FanOutTaskService failingTaskService = new FanOutTaskService(fanOutTaskRepository,
+				failingFanOut, versionRepository, Clock.systemUTC(), new Random(),
+				transactionManager);
 		PolicyObservationScheduler scheduler = new PolicyObservationScheduler(policyRepository,
-				orchestrator(fetcher), failingFanOut, transactionManager,
+				orchestrator(fetcher), failingTaskService, transactionManager,
 				Clock.fixed(TICK_START, ZoneOffset.UTC), INTERVAL);
 
 		scheduler.checkDuePolicies();
@@ -370,7 +377,9 @@ class PolicyOwnershipFanOutIntegrationTest {
 	}
 
 	private PolicyObservationScheduler scheduler(PolicyFetcher fetcher) {
-		return new PolicyObservationScheduler(policyRepository, orchestrator(fetcher), fanOut(),
+		FanOutTaskService taskService = new FanOutTaskService(fanOutTaskRepository, fanOut(),
+				versionRepository, Clock.systemUTC(), new Random(), transactionManager);
+		return new PolicyObservationScheduler(policyRepository, orchestrator(fetcher), taskService,
 				transactionManager, Clock.fixed(TICK_START, ZoneOffset.UTC), INTERVAL);
 	}
 

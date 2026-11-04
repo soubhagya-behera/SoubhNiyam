@@ -39,6 +39,7 @@ import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttempt;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptRepository;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptStatus;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptTrigger;
+import com.soubhagya.policyimpactengine.notification.domain.FanOutTaskRepository;
 import com.soubhagya.policyimpactengine.policy.application.PolicyObservationPersistenceService;
 import com.soubhagya.policyimpactengine.policy.application.PolicyObservationResult;
 import com.soubhagya.policyimpactengine.policy.application.PolicyObservationService;
@@ -76,6 +77,7 @@ class PolicyFetchAttemptIntegrationTest {
 	@Autowired private ChangeConceptMatchRepository matchRepository;
 	@Autowired private ChangeImpactRepository impactRepository;
 	@Autowired private PolicyFetchAttemptRepository attemptRepository;
+	@Autowired private FanOutTaskRepository fanOutTaskRepository;
 	@Autowired private PolicyFetchAttemptService attemptService;
 	@Autowired private PolicyObservationPersistenceService persistenceService;
 	@Autowired private PlatformTransactionManager transactionManager;
@@ -86,6 +88,7 @@ class PolicyFetchAttemptIntegrationTest {
 
 	@BeforeEach
 	void clean() {
+		fanOutTaskRepository.deleteAll();
 		attemptRepository.deleteAll();
 		impactRepository.deleteAll();
 		matchRepository.deleteAll();
@@ -178,7 +181,7 @@ class PolicyFetchAttemptIntegrationTest {
 		Policy policy = registeredPolicy();
 		PolicyObservationPersistenceService failingPersistence =
 				mock(PolicyObservationPersistenceService.class);
-		when(failingPersistence.store(any(UUID.class), anyString(), anyString()))
+		when(failingPersistence.store(any(UUID.class), anyString(), anyString(), any(UUID.class)))
 				.thenThrow(new IllegalStateException("version store down"));
 		PolicyObservationService orchestrator = new PolicyObservationService(policyRepository,
 				htmlFetcher("<html><body><p>Content.</p></body></html>"), extractor, normalizer,

@@ -272,7 +272,7 @@ class RecommendationIntegrationTest {
 		return new PolicyObservationPersistenceService(versionService, versionRepository,
 				diffEngine, changeRepository, new DefaultPolicySimHash(), conceptRepository,
 				matchRepository, conceptMatcher, impactRepository, scoringEngine,
-				transactionManager);
+				null, null, transactionManager);
 	}
 
 	@Test

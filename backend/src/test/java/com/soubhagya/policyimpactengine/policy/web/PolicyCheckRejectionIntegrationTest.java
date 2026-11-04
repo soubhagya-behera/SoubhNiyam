@@ -98,6 +98,7 @@ class PolicyCheckRejectionIntegrationTest {
 	void clean() {
 		Mockito.clearInvocations(fetcher);
 		auditEventRepository.deleteAll();
+		jdbcTemplate.update("DELETE FROM fan_out_task");
 		jdbcTemplate.update("DELETE FROM policy_fetch_attempt");
 		jdbcTemplate.update("DELETE FROM policy_version");
 		policyRepository.deleteAll();

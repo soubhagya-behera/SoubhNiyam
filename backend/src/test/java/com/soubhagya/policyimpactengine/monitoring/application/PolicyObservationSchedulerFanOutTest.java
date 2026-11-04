@@ -2,6 +2,7 @@ package com.soubhagya.policyimpactengine.monitoring.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -27,7 +28,7 @@ import org.springframework.transaction.TransactionStatus;
 import com.soubhagya.policyimpactengine.diff.PolicyDiffResult;
 import com.soubhagya.policyimpactengine.diff.SimHashSimilarity;
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptTrigger;
-import com.soubhagya.policyimpactengine.notification.application.NotificationFanOutService;
+import com.soubhagya.policyimpactengine.notification.application.FanOutTaskService;
 import com.soubhagya.policyimpactengine.policy.application.PolicyObservationResult;
 import com.soubhagya.policyimpactengine.policy.application.PolicyObservationService;
 import com.soubhagya.policyimpactengine.policy.application.PolicyVersionObservationOutcome;
@@ -57,7 +58,7 @@ class PolicyObservationSchedulerFanOutTest {
 	private PolicyObservationService observationService;
 
 	@Mock
-	private NotificationFanOutService fanOutService;
+	private FanOutTaskService fanOutTaskService;
 
 	@Mock
 	private PlatformTransactionManager transactionManager;
@@ -70,7 +71,7 @@ class PolicyObservationSchedulerFanOutTest {
 	@BeforeEach
 	void setUp() {
 		scheduler = new PolicyObservationScheduler(policyRepository, observationService,
-				fanOutService, transactionManager, Clock.fixed(TICK_START, ZoneOffset.UTC),
+				fanOutTaskService, transactionManager, Clock.fixed(TICK_START, ZoneOffset.UTC),
 				INTERVAL);
 	}
 
@@ -92,7 +93,7 @@ class PolicyObservationSchedulerFanOutTest {
 
 		scheduler.checkDuePolicies();
 
-		verify(fanOutService).fanOut(policy.getId(), result);
+		verify(fanOutTaskService).processNewVersion(policy.getId(), result.versionNumber());
 		assertThat(policy.getNextCheckAt()).isEqualTo(TICK_START.plus(INTERVAL));
 	}
 
@@ -112,7 +113,7 @@ class PolicyObservationSchedulerFanOutTest {
 
 		scheduler.checkDuePolicies();
 
-		verify(fanOutService, never()).fanOut(any(), any());
+		verify(fanOutTaskService, never()).processNewVersion(any(), anyInt());
 		assertThat(policy.getNextCheckAt()).isEqualTo(TICK_START.plus(INTERVAL));
 	}
 
@@ -132,7 +133,7 @@ class PolicyObservationSchedulerFanOutTest {
 
 		scheduler.checkDuePolicies();
 
-		verify(fanOutService, never()).fanOut(any(), any());
+		verify(fanOutTaskService, never()).processNewVersion(any(), anyInt());
 		assertThat(policy.getNextCheckAt()).isEqualTo(TICK_START.plus(INTERVAL));
 	}
 
@@ -152,8 +153,8 @@ class PolicyObservationSchedulerFanOutTest {
 				eq(PolicyFetchAttemptTrigger.SCHEDULED))).thenReturn(first);
 		when(observationService.observe(eq(healthy.getId()),
 				eq(PolicyFetchAttemptTrigger.SCHEDULED))).thenReturn(second);
-		doThrow(new IllegalStateException("fan-out boom")).when(fanOutService)
-				.fanOut(eq(failing.getId()), eq(first));
+		doThrow(new IllegalStateException("fan-out boom")).when(fanOutTaskService)
+				.processNewVersion(eq(failing.getId()), eq(first.versionNumber()));
 		givenTransaction();
 		when(policyRepository.findById(failing.getId())).thenReturn(Optional.of(failing));
 		when(policyRepository.findById(healthy.getId())).thenReturn(Optional.of(healthy));
@@ -162,8 +163,8 @@ class PolicyObservationSchedulerFanOutTest {
 
 		scheduler.checkDuePolicies();
 
-		verify(fanOutService).fanOut(failing.getId(), first);
-		verify(fanOutService).fanOut(healthy.getId(), second);
+		verify(fanOutTaskService).processNewVersion(failing.getId(), first.versionNumber());
+		verify(fanOutTaskService).processNewVersion(healthy.getId(), second.versionNumber());
 		assertThat(failing.getNextCheckAt()).isEqualTo(TICK_START.plus(INTERVAL));
 		assertThat(healthy.getNextCheckAt()).isEqualTo(TICK_START.plus(INTERVAL));
 	}

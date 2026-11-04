@@ -30,7 +30,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptTrigger;
-import com.soubhagya.policyimpactengine.notification.application.NotificationFanOutService;
+import com.soubhagya.policyimpactengine.notification.application.FanOutTaskService;
 import com.soubhagya.policyimpactengine.policy.application.PolicyObservationService;
 import com.soubhagya.policyimpactengine.policy.domain.Policy;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyRepository;
@@ -55,7 +55,7 @@ class PolicyObservationSchedulerTest {
 	private PolicyObservationService observationService;
 
 	@Mock
-	private NotificationFanOutService fanOutService;
+	private FanOutTaskService fanOutTaskService;
 
 	@Mock
 	private PlatformTransactionManager transactionManager;
@@ -68,7 +68,7 @@ class PolicyObservationSchedulerTest {
 	@BeforeEach
 	void setUp() {
 		scheduler = new PolicyObservationScheduler(policyRepository, observationService,
-				fanOutService, transactionManager, Clock.fixed(TICK_START, ZoneOffset.UTC),
+				fanOutTaskService, transactionManager, Clock.fixed(TICK_START, ZoneOffset.UTC),
 				INTERVAL);
 	}
 
@@ -229,28 +229,28 @@ class PolicyObservationSchedulerTest {
 	void nullAndNonPositiveArgumentsRejected() {
 		Clock clock = Clock.fixed(TICK_START, ZoneOffset.UTC);
 		assertThatThrownBy(() -> new PolicyObservationScheduler(null, observationService,
-				fanOutService, transactionManager, clock, INTERVAL))
+				fanOutTaskService, transactionManager, clock, INTERVAL))
 				.isInstanceOf(IllegalArgumentException.class);
 		assertThatThrownBy(() -> new PolicyObservationScheduler(policyRepository, null,
-				fanOutService, transactionManager, clock, INTERVAL))
+				fanOutTaskService, transactionManager, clock, INTERVAL))
 				.isInstanceOf(IllegalArgumentException.class);
 		assertThatThrownBy(() -> new PolicyObservationScheduler(policyRepository,
 				observationService, null, transactionManager, clock, INTERVAL))
 				.isInstanceOf(IllegalArgumentException.class);
 		assertThatThrownBy(() -> new PolicyObservationScheduler(policyRepository,
-				observationService, fanOutService, null, clock, INTERVAL))
+				observationService, fanOutTaskService, null, clock, INTERVAL))
 				.isInstanceOf(IllegalArgumentException.class);
 		assertThatThrownBy(() -> new PolicyObservationScheduler(policyRepository,
-				observationService, fanOutService, transactionManager, null, INTERVAL))
+				observationService, fanOutTaskService, transactionManager, null, INTERVAL))
 				.isInstanceOf(IllegalArgumentException.class);
 		assertThatThrownBy(() -> new PolicyObservationScheduler(policyRepository,
-				observationService, fanOutService, transactionManager, clock, null))
+				observationService, fanOutTaskService, transactionManager, clock, null))
 				.isInstanceOf(IllegalArgumentException.class);
 		assertThatThrownBy(() -> new PolicyObservationScheduler(policyRepository,
-				observationService, fanOutService, transactionManager, clock, Duration.ZERO))
+				observationService, fanOutTaskService, transactionManager, clock, Duration.ZERO))
 				.isInstanceOf(IllegalArgumentException.class);
 		assertThatThrownBy(() -> new PolicyObservationScheduler(policyRepository,
-				observationService, fanOutService, transactionManager, clock, Duration.ofHours(-1)))
+				observationService, fanOutTaskService, transactionManager, clock, Duration.ofHours(-1)))
 				.isInstanceOf(IllegalArgumentException.class);
 	}
 
