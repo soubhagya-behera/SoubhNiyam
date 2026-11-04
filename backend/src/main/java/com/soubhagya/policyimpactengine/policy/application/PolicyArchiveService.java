@@ -1,5 +1,6 @@
 package com.soubhagya.policyimpactengine.policy.application;
 
+import java.time.Clock;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import com.soubhagya.policyimpactengine.audit.application.AuditService;
 import com.soubhagya.policyimpactengine.audit.domain.AuditEventType;
 import com.soubhagya.policyimpactengine.audit.domain.AuditMetadata;
+import com.soubhagya.policyimpactengine.notification.domain.FanOutTaskRepository;
 import com.soubhagya.policyimpactengine.policy.domain.Policy;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyRepository;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyStatus;
@@ -33,28 +35,43 @@ import com.soubhagya.policyimpactengine.policy.domain.PolicyStatus;
  * <p>Phase 14-C/2 emits {@code POLICY_ARCHIVED} only on the actual
  * transition, after the archive commits — a best-effort witness
  * that never rolls back the committed {@code ARCHIVED} state (see
- * DECISIONS.md ADR-022). No other audit event, no row deletion, no
- * scheduler/fan-out/observation/ownership change, and no
- * reactivation path exist in this slice.
+ * DECISIONS.md ADR-022). The same archive transaction also cancels
+ * outstanding fan-out tasks for the policy, fencing any stale claim
+ * token. No other audit event, no row deletion, no
+ * scheduler/observation/ownership change, and no reactivation path
+ * exist in this slice.
  */
 @Service
 public class PolicyArchiveService {
 
+	private static final String ARCHIVE_CANCEL_REASON = "policy archived";
+
 	private final PolicyRepository repository;
 	private final TransactionTemplate archiveTransaction;
 	private final AuditService auditService;
+	private final FanOutTaskRepository fanOutTaskRepository;
+	private final Clock clock;
 
 	public PolicyArchiveService(PolicyRepository repository,
-			PlatformTransactionManager transactionManager, AuditService auditService) {
+			PlatformTransactionManager transactionManager, AuditService auditService,
+			FanOutTaskRepository fanOutTaskRepository, Clock clock) {
 		if (repository == null) {
 			throw new IllegalArgumentException("PolicyRepository must not be null");
 		}
 		if (transactionManager == null || auditService == null) {
 			throw new IllegalArgumentException("Dependencies must not be null");
 		}
+		if (fanOutTaskRepository == null) {
+			throw new IllegalArgumentException("FanOutTaskRepository must not be null");
+		}
+		if (clock == null) {
+			throw new IllegalArgumentException("Clock must not be null");
+		}
 		this.repository = repository;
 		this.archiveTransaction = new TransactionTemplate(transactionManager);
 		this.auditService = auditService;
+		this.fanOutTaskRepository = fanOutTaskRepository;
+		this.clock = clock;
 	}
 
 	/**
@@ -76,9 +93,15 @@ public class PolicyArchiveService {
 		if (policyId == null) {
 			throw new IllegalArgumentException("Policy id must not be null");
 		}
-		boolean transitioned = archiveTransaction.execute(
-				status -> repository.archiveOwnedActive(policyId, userId,
-						PolicyStatus.ACTIVE, PolicyStatus.ARCHIVED) == 1);
+		boolean transitioned = archiveTransaction.execute(status -> {
+			boolean archived = repository.archiveOwnedActive(policyId, userId,
+					PolicyStatus.ACTIVE, PolicyStatus.ARCHIVED) == 1;
+			if (archived) {
+				fanOutTaskRepository.cancelOutstandingByPolicyId(policyId,
+						ARCHIVE_CANCEL_REASON, clock.instant());
+			}
+			return archived;
+		});
 		if (transitioned) {
 			auditService.append(userId, AuditEventType.POLICY_ARCHIVED, "POLICY",
 					policyId, AuditMetadata.empty(), null);
