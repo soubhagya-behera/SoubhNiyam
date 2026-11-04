@@ -236,7 +236,7 @@ public class PolicyObservationService {
 		}
 		PolicyObservationResult result;
 		try {
-			result = persistenceService.store(policyId, normalized, hash);
+			result = persistenceService.store(policyId, normalized, hash, attempt.getId());
 		}
 		catch (RuntimeException persistenceFailure) {
 			PolicyFetchAttempt failed = attemptService.markFailed(attempt.getId(), fetched.statusCode(),

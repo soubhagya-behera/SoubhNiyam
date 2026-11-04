@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptTrigger;
-import com.soubhagya.policyimpactengine.notification.application.NotificationFanOutService;
+import com.soubhagya.policyimpactengine.notification.application.FanOutTaskService;
 import com.soubhagya.policyimpactengine.policy.domain.Policy;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyRepository;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyStatus;
@@ -41,23 +41,23 @@ public class PolicyCheckService {
 
 	private final PolicyRepository policyRepository;
 	private final PolicyObservationService observationService;
-	private final NotificationFanOutService fanOutService;
+	private final FanOutTaskService fanOutTaskService;
 
 	public PolicyCheckService(PolicyRepository policyRepository,
 			PolicyObservationService observationService,
-			NotificationFanOutService fanOutService) {
+			FanOutTaskService fanOutTaskService) {
 		if (policyRepository == null) {
 			throw new IllegalArgumentException("PolicyRepository must not be null");
 		}
 		if (observationService == null) {
 			throw new IllegalArgumentException("ObservationService must not be null");
 		}
-		if (fanOutService == null) {
-			throw new IllegalArgumentException("FanOutService must not be null");
+		if (fanOutTaskService == null) {
+			throw new IllegalArgumentException("FanOutTaskService must not be null");
 		}
 		this.policyRepository = policyRepository;
 		this.observationService = observationService;
-		this.fanOutService = fanOutService;
+		this.fanOutTaskService = fanOutTaskService;
 	}
 
 	/**
@@ -87,7 +87,7 @@ public class PolicyCheckService {
 		PolicyObservationResult result = observationService.observe(policyId,
 				PolicyFetchAttemptTrigger.MANUAL);
 		try {
-			fanOutService.fanOut(policyId, result);
+			fanOutTaskService.processNewVersion(policyId, result.versionNumber());
 		}
 		catch (RuntimeException fanOutFailure) {
 			// Isolated exactly like the scheduler isolates fan-out per

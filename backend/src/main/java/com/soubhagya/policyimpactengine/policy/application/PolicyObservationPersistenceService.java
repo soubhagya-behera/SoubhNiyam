@@ -3,6 +3,8 @@ package com.soubhagya.policyimpactengine.policy.application;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,6 +32,8 @@ import com.soubhagya.policyimpactengine.intelligence.domain.ChangeConceptMatch;
 import com.soubhagya.policyimpactengine.intelligence.domain.ChangeConceptMatchRepository;
 import com.soubhagya.policyimpactengine.intelligence.domain.PrivacyConcept;
 import com.soubhagya.policyimpactengine.intelligence.domain.PrivacyConceptRepository;
+import com.soubhagya.policyimpactengine.notification.domain.FanOutTask;
+import com.soubhagya.policyimpactengine.notification.domain.FanOutTaskRepository;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyVersion;
 import com.soubhagya.policyimpactengine.policy.domain.PolicyVersionRepository;
 
@@ -139,6 +143,8 @@ public class PolicyObservationPersistenceService {
 	private final ChangeImpactRepository impactRepository;
 	private final ImpactScoringEngine scoringEngine;
 	private final TransactionTemplate transactionTemplate;
+	private final FanOutTaskRepository fanOutTaskRepository;
+	private final Clock clock;
 
 	public PolicyObservationPersistenceService(
 			PolicyVersionService versionService,
@@ -149,7 +155,7 @@ public class PolicyObservationPersistenceService {
 			PlatformTransactionManager transactionManager) {
 		this(versionService, versionRepository, diffEngine, changeRepository, simHash, null, null,
 				new com.soubhagya.policyimpactengine.intelligence.DeterministicConceptMatcher(), null,
-				new DeterministicImpactScoringEngine(), transactionManager);
+				new DeterministicImpactScoringEngine(), null, null, transactionManager);
 	}
 
 	public PolicyObservationPersistenceService(
@@ -163,7 +169,8 @@ public class PolicyObservationPersistenceService {
 			ConceptMatcher conceptMatcher,
 			PlatformTransactionManager transactionManager) {
 		this(versionService, versionRepository, diffEngine, changeRepository, simHash, conceptRepository,
-				matchRepository, conceptMatcher, null, new DeterministicImpactScoringEngine(), transactionManager);
+				matchRepository, conceptMatcher, null, new DeterministicImpactScoringEngine(), null, null,
+				transactionManager);
 	}
 
 	@Autowired
@@ -178,6 +185,8 @@ public class PolicyObservationPersistenceService {
 			ConceptMatcher conceptMatcher,
 			ChangeImpactRepository impactRepository,
 			ImpactScoringEngine scoringEngine,
+			FanOutTaskRepository fanOutTaskRepository,
+			Clock clock,
 			PlatformTransactionManager transactionManager) {
 		if (versionService == null) {
 			throw new IllegalArgumentException("PolicyVersionService must not be null");
@@ -209,7 +218,26 @@ public class PolicyObservationPersistenceService {
 				: new com.soubhagya.policyimpactengine.intelligence.DeterministicConceptMatcher();
 		this.impactRepository = impactRepository;
 		this.scoringEngine = scoringEngine != null ? scoringEngine : new DeterministicImpactScoringEngine();
+		this.fanOutTaskRepository = fanOutTaskRepository;
+		this.clock = clock;
 		this.transactionTemplate = new TransactionTemplate(transactionManager);
+	}
+
+	public PolicyObservationPersistenceService(
+			PolicyVersionService versionService,
+			PolicyVersionRepository versionRepository,
+			PolicyDiffEngine diffEngine,
+			PolicyChangeRecordRepository changeRepository,
+			PolicySimHash simHash,
+			PrivacyConceptRepository conceptRepository,
+			ChangeConceptMatchRepository matchRepository,
+			ConceptMatcher conceptMatcher,
+			ChangeImpactRepository impactRepository,
+			ImpactScoringEngine scoringEngine,
+			PlatformTransactionManager transactionManager) {
+		this(versionService, versionRepository, diffEngine, changeRepository, simHash, conceptRepository,
+				matchRepository, conceptMatcher, impactRepository, scoringEngine, null, null,
+				transactionManager);
 	}
 
 	/**
@@ -223,6 +251,11 @@ public class PolicyObservationPersistenceService {
 	 *         {@code NEW_VERSION}; never exposes JPA entities
 	 */
 	public PolicyObservationResult store(UUID policyId, String normalizedContent, String contentHash) {
+		return store(policyId, normalizedContent, contentHash, null);
+	}
+
+	public PolicyObservationResult store(UUID policyId, String normalizedContent, String contentHash,
+			UUID sourceAttemptId) {
 		if (policyId == null) {
 			throw new IllegalArgumentException("Policy id must not be null");
 		}
@@ -326,6 +359,16 @@ public class PolicyObservationPersistenceService {
 
 			previousNormalizedRef.set(previous.getNormalizedContent());
 			newNormalizedRef.set(created.getNormalizedContent());
+
+			if (fanOutTaskRepository != null) {
+				Instant now = (clock != null ? clock : Clock.systemUTC()).instant();
+				fanOutTaskRepository.saveAndFlush(new FanOutTask(
+						created.getPolicy(),
+						created,
+						created.getPolicy().getOwner(),
+						sourceAttemptId,
+						now));
+			}
 
 			return new PolicyObservationResult(
 					policyId,

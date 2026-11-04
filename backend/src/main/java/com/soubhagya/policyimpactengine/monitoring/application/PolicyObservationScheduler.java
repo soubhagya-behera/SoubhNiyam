@@ -14,7 +14,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.soubhagya.policyimpactengine.monitoring.domain.PolicyFetchAttemptTrigger;
-import com.soubhagya.policyimpactengine.notification.application.NotificationFanOutService;
+import com.soubhagya.policyimpactengine.notification.application.FanOutTaskService;
 import com.soubhagya.policyimpactengine.policy.application.PolicyObservationResult;
 import com.soubhagya.policyimpactengine.policy.application.PolicyObservationService;
 import com.soubhagya.policyimpactengine.policy.domain.Policy;
@@ -55,7 +55,9 @@ import com.soubhagya.policyimpactengine.policy.domain.PolicyStatus;
  *
  * <p>Phase 10B-1 automatic fan-out: after a successful observation the
  * tick hands the observation result to
- * {@link NotificationFanOutService}, which notifies the policy's
+ * {@link FanOutTaskService}, which claims the durable task for the
+ * exact persisted version through the same atomic PENDING-only claim
+ * used by the manual path. The task service then notifies the policy's
  * single owner for an eligible {@code NEW_VERSION} only
  * ({@code ACTIVE} policy with a non-null owner). Fan-out runs after
  * the observation's own success/terminal handling, never alters the
@@ -74,14 +76,14 @@ public class PolicyObservationScheduler {
 
 	private final PolicyRepository policyRepository;
 	private final PolicyObservationService observationService;
-	private final NotificationFanOutService fanOutService;
+	private final FanOutTaskService fanOutTaskService;
 	private final TransactionTemplate writeTransaction;
 	private final Clock clock;
 	private final Duration checkInterval;
 
 	public PolicyObservationScheduler(PolicyRepository policyRepository,
 			PolicyObservationService observationService,
-			NotificationFanOutService fanOutService,
+			FanOutTaskService fanOutTaskService,
 			PlatformTransactionManager transactionManager,
 			Clock clock,
 			@Value("${monitoring.check-interval:PT24H}") Duration checkInterval) {
@@ -91,8 +93,8 @@ public class PolicyObservationScheduler {
 		if (observationService == null) {
 			throw new IllegalArgumentException("ObservationService must not be null");
 		}
-		if (fanOutService == null) {
-			throw new IllegalArgumentException("FanOutService must not be null");
+		if (fanOutTaskService == null) {
+			throw new IllegalArgumentException("FanOutTaskService must not be null");
 		}
 		if (transactionManager == null) {
 			throw new IllegalArgumentException("Transaction manager must not be null");
@@ -105,7 +107,7 @@ public class PolicyObservationScheduler {
 		}
 		this.policyRepository = policyRepository;
 		this.observationService = observationService;
-		this.fanOutService = fanOutService;
+		this.fanOutTaskService = fanOutTaskService;
 		this.writeTransaction = new TransactionTemplate(transactionManager);
 		this.clock = clock;
 		this.checkInterval = checkInterval;
@@ -128,7 +130,8 @@ public class PolicyObservationScheduler {
 				PolicyObservationResult result = observationService.observe(
 						policy.getId(), PolicyFetchAttemptTrigger.SCHEDULED);
 				try {
-					fanOutService.fanOut(policy.getId(), result);
+					fanOutTaskService.processNewVersion(policy.getId(),
+							result.versionNumber());
 				}
 				catch (RuntimeException fanOutFailure) {
 					// Phase 10B-1 failure isolation: the observation
