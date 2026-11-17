@@ -10,6 +10,10 @@ vi.mock('../../api/audit', () => ({
   listAuditEvents: vi.fn(),
 }))
 
+vi.mock('../../api/privacy', () => ({
+  listPrivacyPreferences: vi.fn().mockResolvedValue([]),
+}))
+
 const mockedListAuditEvents = vi.mocked(listAuditEvents)
 
 function makeEvent(index: number): AuditEvent {

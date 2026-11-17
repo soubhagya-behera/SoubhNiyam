@@ -124,6 +124,76 @@ export function auditEventLabel(eventType: string): string {
 }
 
 /**
+ * Friendly subject line for an audit row's resource, without printing a
+ * raw UUID. `POLICY` rows name the tracked document; `USER` rows are the
+ * account itself; unknown resource types fall back to their original
+ * value. The id is deliberately never rendered — the feed is a human
+ * summary, and the hash chain preserves traceability server-side.
+ */
+export function auditResourceLabel(
+  resourceType: string,
+  _resourceId: string | null,
+): string {
+  switch (resourceType) {
+    case 'POLICY':
+      return 'Tracked policy'
+    case 'USER':
+      return 'Your account'
+    default:
+      return resourceType
+  }
+}
+
+/** Parsed preference-change facts for audit metadata, when present. */
+export interface AuditPreferenceMetadata {
+  conceptCode: string | null
+  /** Sensitivity before the change; null for a first-time value. */
+  from: number | null
+  /** Sensibility after the change; null when the preference was removed. */
+  to: number | null
+}
+
+/**
+ * Defensive reader for the opaque JSON metadata an audit event carries.
+ *
+ * The backend's schema for privacy-preference events is known
+ * (`conceptCode` plus `oldSensitivity`/`newSensitivity`, per
+ * `UserPrivacyPreferenceService`), but the field is still returned as
+ * a JSON string, so this reader accepts only what it can verify: an
+ * object with the expected field names and scalar types. Anything
+ * unparsable, partial, or of the wrong shape yields `null` — a blank
+ * detail line is the honest rendering, a guessed one is not.
+ */
+export function auditPreferenceMetadata(
+  metadata: string | null | undefined,
+): AuditPreferenceMetadata | null {
+  if (!metadata) return null
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(metadata)
+  } catch {
+    return null
+  }
+  if (!isRecord(parsed)) return null
+
+  const conceptCode =
+    typeof parsed['conceptCode'] === 'string' ? parsed['conceptCode'] : null
+  const from = finiteOrNull(parsed['oldSensitivity'])
+  const to = finiteOrNull(parsed['newSensitivity'])
+
+  if (conceptCode === null && from === null && to === null) return null
+  return { conceptCode, from, to }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+function finiteOrNull(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+/**
  * Absolute date/time in the viewer's locale. Rendered inside `<time>` with a
  * machine-readable `dateTime` attribute supplied by the caller.
  */
