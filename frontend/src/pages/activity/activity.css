@@ -1,0 +1,149 @@
+/**
+ * Activity page — scoped visual refresh.
+ *
+ * Tailwind v4 colour utilities compile to `var(--color-*)` references, so
+ * re-declaring the palette custom properties on `.activity-page` re-skins
+ * this page (and every shared component rendered inside it) without
+ * touching the global tokens in `styles/index.css` — other pages keep the
+ * shared palette untouched.
+ *
+ * The redesign palette: true near-black page ground, midnight-blue card
+ * surfaces and hairlines, blue-grey secondary text, and the unchanged
+ * electric green / mint accents. Green stays a highlight colour here, not
+ * a tint on the page itself.
+ */
+.activity-page {
+  /* ---- Surfaces ---------------------------------------------------- */
+  /* Near-black, deliberately without the green undertone of the shared
+     base token; card and elevated surfaces go midnight instead of green. */
+  --color-base: #050505;
+  --color-surface: #080d12;
+  --color-raised: #0b1118;
+  --color-panel: #0b132b;
+  --color-hover: #101a2b;
+  --color-input: #080d12;
+
+  /* ---- Hairlines: dark midnight blue, never greenish ---------------- */
+  --color-line: #1b2b42;
+  --color-line-strong: #2a3d5f;
+
+  /* ---- Text: near-white headings, neutral grey body/metadata -------- */
+  /* Muted metadata greys are derived from the body colour #d0d8d4 with the
+     green hue removed — cool blue-neutrals, never green-tinted — and all
+     stay >= 4.5:1 on the card background so metadata remains readable. */
+  --color-ink: #f4fff8;
+  --color-ink-secondary: #d0d8d4;
+  --color-ink-muted: #a2a8ab;
+  --color-ink-faint: #979da0;
+  --color-ink-ghost: #8c9295;
+
+  /* ---- Accents: page-scoped so the page never reads the global theme --
+     This page ships ahead of the global palette change; the accent family
+     and the semantic error hue are re-declared here, exactly like the
+     surface and text tokens above, so every accent/negative utility inside
+     this page — including the shared components rendered within it —
+     resolves to the approved values. Other pages keep the global tokens.
+     (#39FF88 electric green, #A7F3C5 mint) stay highlights only, never a
+     tint on the page itself. */
+  --color-accent: #39ff88;
+  --color-accent-soft: #a7f3c5;
+  --color-negative: #ff5f7e;
+
+  background-color: #050505;
+
+  /* Fill the routed area below the sticky navigation so short feeds never
+     expose the global page colour underneath. Navigation is 4rem tall on
+     mobile and desktop, 5rem between the md and lg breakpoints. */
+  min-height: calc(100vh - 4rem);
+  min-height: calc(100dvh - 4rem);
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .activity-page {
+    min-height: calc(100vh - 5rem);
+    min-height: calc(100dvh - 5rem);
+  }
+}
+
+/**
+ * Ordinary descriptive text: body-bright, matching the approved Privacy
+ * Profile page.
+ *
+ * The shared `PageHeader`, `Section`, `EmptyState` and `HelperNote` render
+ * their paragraphs with `text-ink-muted`, and the event rows add resource
+ * subtitles ("Your account", "Tracked policy", concept detail lines) with
+ * the same class. On this page every such paragraph lifts to the body
+ * token, so no descriptive text renders in a green-tinted grey. Green
+ * stays reserved for the page label, icons and interactive highlights.
+ */
+.activity-page p.text-ink-muted {
+  color: var(--color-ink-secondary);
+}
+
+/**
+ * Timestamps: the feed's <time> elements read as body text here rather
+ * than in the ghost grey.
+ */
+.activity-page time {
+  color: var(--color-ink-secondary);
+}
+
+/**
+ * Section headings: Privacy Profile renders its section h2 semibold;
+ * the shared `Section` defaults to the display face's light weight.
+ * Match it here so the heading hierarchy reads the same on both pages.
+ */
+.activity-page section > div > div > h2 {
+  font-weight: 600;
+}
+
+/**
+ * Approved focus ring and text selection for this page. The global
+ * stylesheet still themes both from the shared accent tokens; scoped to
+ * the page they resolve to the approved electric green, and selected text
+ * flips to the page ground colour for readability on the bright green.
+ */
+.activity-page :focus-visible {
+  outline-color: var(--color-accent);
+}
+
+.activity-page ::selection {
+  background-color: var(--color-accent);
+  color: var(--color-base);
+}
+
+/**
+ * Semantic error styling. Tailwind v4 only generates colour utilities for
+ * tokens declared in the global @theme block, and at the time this page
+ * ships the shared stylesheet has no --color-negative token yet, so the
+ * negative-* utility classes on this page resolve to nothing. The markup
+ * keeps using them; these page-scoped rules give them the approved values
+ * and start tracking the global tokens once they exist.
+ */
+.activity-page .text-negative {
+  color: var(--color-negative);
+}
+
+.activity-page [class*='border-negative/30'] {
+  border-color: color-mix(in oklab, var(--color-negative) 30%, transparent);
+}
+
+.activity-page [class*='border-negative/40'] {
+  border-color: color-mix(in oklab, var(--color-negative) 40%, transparent);
+}
+
+.activity-page [class*='bg-negative/10'] {
+  background-color: color-mix(in oklab, var(--color-negative) 10%, transparent);
+}
+
+/**
+ * The shared ErrorState still themes errors from the mint accent; on this
+ * page the approved error treatment is semantic red.
+ */
+.activity-page div[role='alert'] {
+  border-color: color-mix(in oklab, var(--color-negative) 40%, transparent);
+}
+
+.activity-page div[role='alert'] > p.type-subheading {
+  color: var(--color-negative);
+}

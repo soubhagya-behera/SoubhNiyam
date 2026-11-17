@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import type { ImpactSummary } from '../api/types'
 import {
   auditEventLabel,
+  auditPreferenceMetadata,
+  auditResourceLabel,
   changeTypeLabel,
   formatBytes,
   formatDateTime,
@@ -125,6 +127,53 @@ describe('auditEventLabel', () => {
   it('falls back to the original value for unknown future codes', () => {
     expect(auditEventLabel('SOME_FUTURE_EVENT')).toBe('SOME_FUTURE_EVENT')
     expect(auditEventLabel('')).toBe('')
+  })
+})
+
+describe('auditResourceLabel', () => {
+  it('names the account and tracked documents without ids', () => {
+    expect(auditResourceLabel('USER', 'user-9')).toBe('Your account')
+    expect(auditResourceLabel('POLICY', 'policy-3')).toBe('Tracked policy')
+  })
+
+  it('falls back to the raw resource type for unknown kinds', () => {
+    expect(auditResourceLabel('SOMETHING_ELSE', 'id-1')).toBe('SOMETHING_ELSE')
+  })
+})
+
+describe('auditPreferenceMetadata', () => {
+  it('reads the backend preference-event schema', () => {
+    expect(
+      auditPreferenceMetadata(
+        JSON.stringify({ conceptCode: 'LOCATION', oldSensitivity: 2, newSensitivity: 4 }),
+      ),
+    ).toEqual({ conceptCode: 'LOCATION', from: 2, to: 4 })
+
+    // A first-time value has no previous sensitivity.
+    expect(
+      auditPreferenceMetadata(
+        JSON.stringify({ conceptCode: 'HEALTH', oldSensitivity: null, newSensitivity: 3 }),
+      ),
+    ).toEqual({ conceptCode: 'HEALTH', from: null, to: 3 })
+
+    // A removed preference has no new sensitivity.
+    expect(
+      auditPreferenceMetadata(
+        JSON.stringify({ conceptCode: 'HEALTH', oldSensitivity: 3 }),
+      ),
+    ).toEqual({ conceptCode: 'HEALTH', from: 3, to: null })
+  })
+
+  it('never guesses: unparsable or wrong-shaped metadata yields null', () => {
+    expect(auditPreferenceMetadata(null)).toBeNull()
+    expect(auditPreferenceMetadata('')).toBeNull()
+    expect(auditPreferenceMetadata('not json')).toBeNull()
+    expect(auditPreferenceMetadata('[1,2,3]')).toBeNull()
+    expect(auditPreferenceMetadata('"just a string"')).toBeNull()
+    expect(auditPreferenceMetadata('{}')).toBeNull()
+    expect(
+      auditPreferenceMetadata(JSON.stringify({ conceptCode: 42 })),
+    ).toBeNull()
   })
 })
 
