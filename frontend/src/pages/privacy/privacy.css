@@ -1,0 +1,64 @@
+/** Privacy profile page — scoped visual refresh.
+ * Same mechanism as the approved Activity page: Tailwind v4 colour
+ * utilities compile to `var(--color-*)` references, so re-declaring the
+ * palette custom properties on `.privacy-page` re-skins this page (and
+ * every shared component rendered inside it) without touching the global
+ * tokens in `styles/index.css` — other pages keep the shared palette.
+ *
+ * Palette: true near-black page ground, midnight-blue card surfaces and
+ * hairlines, cool grey body text, and the shared electric green / mint
+ * accents used selectively for highlights and interactive elements.
+ */
+.privacy-page {
+  /* ---- Surfaces ---------------------------------------------------- */
+  /* Near-black without the green undertone of the shared base token;
+     card and elevated surfaces go midnight instead of green. */
+  --color-base: #050505;
+  --color-surface: #080d12;
+  --color-raised: #0b1118;
+  --color-panel: #0b132b;
+  --color-hover: #101a2b;
+  --color-input: #080d12;
+
+  /* ---- Hairlines: dark midnight blue, never greenish ---------------- */
+  --color-line: #1b2b42;
+  --color-line-strong: #2a3d5f;
+
+  /* ---- Text: near-white headings, cool grey body, blue-grey muted -- */
+  --color-ink: #f4fff8;
+  --color-ink-secondary: #d0d8d4;
+  --color-ink-muted: #91a39a;
+  /* Derived in-betweens, re-derived for the new surfaces; both stay
+     >= 4.5:1 on the card background so metadata stays readable. */
+  --color-ink-faint: #8b97a3;
+  --color-ink-ghost: #83909b;
+
+  /* ---- Accents (#39FF88 electric green, #A7F3C5 mint) are already the shared
+     tokens and are used as-is — selectively, for highlights only. */
+  --color-accent: #39ff88;
+  --color-accent-soft: #a7f3c5;
+  --color-negative: #ff5f7e;
+
+  background-color: #050505;
+
+  /* Fill the routed area below the sticky navigation so short pages never
+     expose the global page colour underneath. Navigation is 4rem tall on
+     mobile and desktop, 5rem between the md and lg breakpoints. */
+  min-height: calc(100vh - 4rem);
+  min-height: calc(100dvh - 4rem);
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .privacy-page {
+    min-height: calc(100vh - 5rem);
+    min-height: calc(100dvh - 5rem);
+  }
+}
+
+/** Unfilled steps in the 0-5 indicator: charcoal with the faintest green cast.
+ * Scoped to this page so the readout stays legible without adding glow, and
+ * so no other page's scale is affected.
+ */
+.privacy-page .sensitivity-step-empty {
+  background-color: #1c2b25;
+}

@@ -1,28 +1,13 @@
 import { cn } from '../../lib/cn'
 
-/** Backend sensitivity range is 0-5 inclusive. */
-const LEVELS = [0, 1, 2, 3, 4, 5] as const
+/** Number of segments in the indicator; one per sensitivity step 1-5. */
+const SEGMENT_COUNT = 5
 
-/**
- * Bar heights per level. Declared as literal class names (not interpolated)
- * so Tailwind's static extractor can see them in the built CSS.
- */
-const LEVEL_HEIGHT: Record<(typeof LEVELS)[number], string> = {
-  0: 'h-1.5',
-  1: 'h-3',
-  2: 'h-4',
-  3: 'h-5',
-  4: 'h-6',
-  5: 'h-7',
-}
-
-/**
- * Read-only visualisation of a 0-5 sensitivity value.
- *
- * Rendered as a bar chart with a text equivalent rather than colour alone, so
- * the level is not conveyed by hue: each filled bar corresponds to one step,
- * bar height rises with the level, and the value is written out for screen
- * readers.
+/** Read-only visualisation of a 0-5 sensitivity value.
+ * Five vertical steps fill from the left — one per sensitivity step — so the
+ * level is communicated by count as well as colour: filled steps are electric
+ * green, the remainder stay muted charcoal. The numeric value is written out
+ * beside the bars, so the level is never conveyed by hue alone.
  */
 export function SensitivityScale({ value }: { value: number }) {
   const clamped = Math.max(0, Math.min(5, Math.round(value)))
@@ -36,25 +21,24 @@ export function SensitivityScale({ value }: { value: number }) {
           : 'High sensitivity'
 
   return (
-    <div className="flex shrink-0 items-center gap-4">
+    <div className="flex shrink-0 items-center justify-end gap-4 sm:gap-7">
       <span
-        className="flex items-end gap-1"
+        className="flex items-center gap-[5px]"
         role="img"
         aria-label={`Sensitivity ${clamped} of 5: ${descriptor}`}
       >
-        {LEVELS.map((level) => (
+        {Array.from({ length: SEGMENT_COUNT }, (_, index) => (
           <span
-            key={level}
+            key={index}
             aria-hidden="true"
             className={cn(
-              'block w-1.5',
-              LEVEL_HEIGHT[level],
-              level < clamped ? 'bg-accent-soft' : 'bg-line-strong',
+              'block h-[22px] w-2.5 rounded-[3px]',
+              index < clamped ? 'bg-accent' : 'sensitivity-step-empty',
             )}
           />
         ))}
       </span>
-      <span className="font-body text-sm tabular-nums text-ink-muted">
+      <span className="font-body text-sm tabular-nums text-ink-secondary">
         {clamped}/5
       </span>
     </div>
