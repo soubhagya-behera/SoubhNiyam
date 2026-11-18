@@ -77,6 +77,25 @@ describe('PrivacyPage read mode', () => {
     ).toBeDefined()
     expect(screen.queryByRole('combobox')).toBeNull()
   })
+
+  it('shows the scale explainer and a readable numeric rating per concept', async () => {
+    render(<PrivacyPage />)
+    await screen.findByText('Location')
+
+    expect(screen.getByText('How the scale works')).toBeDefined()
+    expect(screen.getByText('Each concept is rated from 0 to 5.')).toBeDefined()
+    expect(screen.getByText('= Not a concern for you')).toBeDefined()
+    expect(screen.getByText('= Very important to you')).toBeDefined()
+    expect(
+      screen.getByText('Values you have not set fall back to the default.'),
+    ).toBeDefined()
+    expect(screen.getByText('Set by you')).toBeDefined()
+    expect(screen.getByText('Default')).toBeDefined()
+    expect(
+      screen.getByRole('img', { name: 'Sensitivity 2 of 5: Low sensitivity' }),
+    ).toBeDefined()
+    expect(screen.getByText('2/5')).toBeDefined()
+  })
 })
 
 describe('PrivacyPage editing', () => {
